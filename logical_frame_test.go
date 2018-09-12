@@ -111,49 +111,49 @@ package jotframe
 // 	expectedOutput = "\x1b[1B"
 // 	testOutput = captureIntStdout(scr.MoveCursor, 2)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move to the next line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move to the next line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
-// 	// move a few lines away
+// 	// move a few activeLines away
 // 	scr.curLine = 1
 // 	expectedOutput = "\x1b[2B"
 // 	testOutput = captureIntStdout(scr.MoveCursor, 3)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move a few lines away): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move a few activeLines away): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
-// 	// move past the FixedFrame (no footer, to last line)
+// 	// move past the logicalFrame (no footer, to last line)
 // 	scr.curLine = 1
 // 	expectedOutput = "\x1b[3B"
 // 	testOutput = captureIntStdout(scr.MoveCursor, 10)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move past the FixedFrame, to last line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move past the logicalFrame, to last line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
-// 	// move past the FixedFrame (no header, to first line)
+// 	// move past the logicalFrame (no header, to first line)
 // 	scr.curLine = 2
 // 	expectedOutput = "\x1b[2A"
 // 	testOutput = captureIntStdout(scr.MoveCursor, -10)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move past the FixedFrame, to first line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move past the logicalFrame, to first line): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
 // 	scr.Reset(5, true, true)
 //
-// 	// move past the FixedFrame (to footer)
+// 	// move past the logicalFrame (to footer)
 // 	scr.curLine = 1
 // 	expectedOutput = "\x1b[4B"
 // 	testOutput = captureIntStdout(scr.MoveCursor, 10)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move past the FixedFrame, to footer): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move past the logicalFrame, to footer): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
-// 	// move past the FixedFrame (to header)
+// 	// move past the logicalFrame (to header)
 // 	scr.curLine = 2
 // 	expectedOutput = "\x1b[3A"
 // 	testOutput = captureIntStdout(scr.MoveCursor, -10)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestMoveCursor (Move past the FixedFrame, to header): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestMoveCursor (move past the logicalFrame, to header): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
 // }
@@ -253,7 +253,7 @@ package jotframe
 // 	expectedOutput = "\x1b[2B\x1b[2K\x1b[0GHello, World!!!!!...\n"
 // 	testOutput = captureStrIntStdout(scr.Display, "Hello, World!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", 3)
 // 	if expectedOutput != testOutput {
-// 		t.Error("TestDisplay (trim long lines): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
+// 		t.Error("TestDisplay (trim long activeLines): Expected", repr.String(expectedOutput), "got", repr.String(testOutput))
 // 	}
 //
 // }

@@ -3,10 +3,10 @@ package jotframe
 var (
 	terminalWidth  int
 	terminalHeight int
-	allFrames      = make([]*FixedFrame, 0)
+	allFrames      = make([]*logicalFrame, 0)
 )
 
-func registerFrame(frame *FixedFrame) {
+func registerFrame(frame *logicalFrame) {
 	allFrames = append(allFrames, frame)
 }
 
@@ -28,16 +28,15 @@ func Refresh() error {
 func refresh() error {
 	for _, frame := range allFrames {
 		if !frame.closed {
-			frame.update()
-			frame.clear(true)
-			frame.draw()
+			frame.clear()
+			frame.updateAndDraw()
 		}
 	}
 	return nil
 }
 
 func Close() error {
-	// each FixedFrame.Close() will implicitly lock
+	// each logicalFrame.Close() will implicitly lock
 	for _, frame := range allFrames {
 		err := frame.Close()
 		if err != nil {

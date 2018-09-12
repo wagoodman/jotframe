@@ -2,8 +2,8 @@ package main
 
 import (
 	"math/rand"
-	"time"
 	"github.com/wagoodman/jotframe"
+	"time"
 	"fmt"
 	"io"
 	"github.com/k0kubun/go-ansi"
@@ -95,6 +95,9 @@ func main() {
 	bar.ClearAndClose()
 
 }
+
+
+
 
 //
 // func main() {

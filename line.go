@@ -2,7 +2,6 @@ package jotframe
 
 import (
 	"github.com/k0kubun/go-ansi"
-	"sync"
 	"os"
 	"fmt"
 	"strings"
@@ -10,19 +9,12 @@ import (
 	"io"
 )
 
-type Line struct {
-	id         uuid.UUID
-	buffer     []byte
-	row        int
-	lock       *sync.Mutex
-	closed     bool
-}
-
 func NewLine(row int) *Line {
 	line := &Line{}
 	line.id = uuid.Must(uuid.NewV4())
 	line.row = row
 	line.lock = getScreenLock()
+	line.stale = true
 	return line
 }
 
@@ -40,6 +32,12 @@ func (line *Line) IsClosed() bool {
 
 func (line Line) String() string {
 	return fmt.Sprintf("<Line id:%s idx:%d closed:%v buffer:%d>", line.id, line.row, line.closed, len(line.buffer))
+}
+
+func (line *Line) move(rows int) error {
+	line.row += rows
+	line.stale = true
+	return nil
 }
 
 func (line *Line) Clear() error {

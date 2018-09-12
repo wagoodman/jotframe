@@ -39,7 +39,7 @@ func pollSignals() {
 			terminalWidth, terminalHeight = getTerminalSize()
 			lock := getScreenLock()
 			lock.Lock()
-			ClearScreen()
+			clearScreen()
 			refresh()
 			lock.Unlock()
 		}

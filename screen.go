@@ -16,7 +16,7 @@ var (
 	screenLock *sync.Mutex
 )
 
-func ClearScreen() {
+func clearScreen() {
 	fmt.Print("\x1b[2J")
 }
 
@@ -44,7 +44,7 @@ func setCursorRow(row int) error {
 
 // todo: will this be supported on windows?... https://github.com/nsf/termbox-go/blob/master/termbox_windows.go
 // currently assumed VT100 compatible emulator
-func getCursorRow() (int, error) {
+func GetCursorRow() (int, error) {
 	var row int
 	oldState, err := terminal.MakeRaw(0)
 	if err != nil {
