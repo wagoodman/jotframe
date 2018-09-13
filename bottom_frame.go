@@ -1,6 +1,6 @@
 package jotframe
 
-func NewBottomFrame(rows int, hasHeader, hasFooter bool) *BottomFrame {
+func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bool) *BottomFrame {
 	height := rows
 	if hasHeader {
 		height++
@@ -16,6 +16,7 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool) *BottomFrame {
 	frame := &BottomFrame{
 		frame: innerFrame,
 		lock: getScreenLock(),
+		trailOnRemove: includeTrailOnRemove,
 	}
 	frame.frame.updateFn = frame.update
 
@@ -89,8 +90,10 @@ func (frame *BottomFrame) Remove(line *Line) error {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	// write the removed line to the trail log + move the frame down
-	frame.frame.appendTrail(string(line.buffer))
+	if frame.trailOnRemove {
+		// write the removed line to the trail log + move the frame down
+		frame.frame.appendTrail(string(line.buffer))
+	}
 	frame.frame.move(1)
 
 	return frame.frame.remove(line)

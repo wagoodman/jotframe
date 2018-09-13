@@ -1,20 +1,21 @@
 package jotframe
 
 
-func NewFixedFrame(rows int, hasHeader, hasFooter bool) *FixedFrame {
+func NewFixedFrame(rows int, hasHeader, hasFooter, includeTrailOnRemove bool) *FixedFrame {
 	currentRow, err := GetCursorRow()
 	if err != nil {
 		panic(err)
 	}
 
-	return NewFixedFrameAt(rows, hasHeader, hasFooter, currentRow)
+	return NewFixedFrameAt(rows, hasHeader, hasFooter, includeTrailOnRemove, currentRow)
 }
 
-func NewFixedFrameAt(rows int, hasHeader, hasFooter bool, destinationRow int) *FixedFrame {
+func NewFixedFrameAt(rows int, hasHeader, hasFooter, includeTrailOnRemove bool, destinationRow int) *FixedFrame {
 	innerFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, destinationRow)
 	frame := &FixedFrame{
 		frame: innerFrame,
 		lock: getScreenLock(),
+		trailOnRemove: includeTrailOnRemove,
 	}
 	frame.frame.updateFn = nil
 
@@ -33,10 +34,20 @@ func (frame *FixedFrame) Lines() []*Line {
 	return frame.frame.activeLines
 }
 
+func (frame *FixedFrame) AppendTrail(str string) {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+	defer frame.frame.updateAndDraw()
+
+	// write the removed line to the trail log + move the frame down (while advancing the frame)
+	frame.frame.appendTrail(str)
+	// frame.frame.move(1)
+	frame.frame.rowPreAdvancements += 1
+}
+
 func (frame *FixedFrame) Append() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.append()
@@ -45,7 +56,6 @@ func (frame *FixedFrame) Append() (*Line, error) {
 func (frame *FixedFrame) Prepend() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.prepend()
@@ -54,7 +64,6 @@ func (frame *FixedFrame) Prepend() (*Line, error) {
 func (frame *FixedFrame) Insert(index int) (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.insert(index)
@@ -63,8 +72,13 @@ func (frame *FixedFrame) Insert(index int) (*Line, error) {
 func (frame *FixedFrame) Remove(line *Line) error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
+
+	if frame.trailOnRemove {
+		// write the removed line to the trail log + move the frame down
+		frame.frame.appendTrail(string(line.buffer))
+	}
+	frame.frame.move(1)
 
 	return frame.frame.remove(line)
 }
@@ -72,7 +86,6 @@ func (frame *FixedFrame) Remove(line *Line) error {
 func (frame *FixedFrame) Move(rows int) error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.move(rows)
@@ -88,7 +101,6 @@ func (frame *FixedFrame) Close() error {
 func (frame *FixedFrame) Clear() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.clear()
@@ -97,7 +109,6 @@ func (frame *FixedFrame) Clear() error {
 func (frame *FixedFrame) ClearAndClose() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-
 	defer frame.frame.updateAndDraw()
 
 	err := frame.frame.clear()

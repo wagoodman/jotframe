@@ -23,7 +23,7 @@ func randomString(len int) string {
 	return string(bytes)
 }
 
-func renderLine(idx int, line *jotframe.Line, frame *jotframe.BottomFrame) {
+func renderLine(idx int, line *jotframe.Line, frame *jotframe.FixedFrame) {
 	message := fmt.Sprintf("%s %s INITIALIZED", line, time.Now())
 	io.WriteString(line, message)
 	for {
@@ -52,11 +52,10 @@ func renderLine(idx int, line *jotframe.Line, frame *jotframe.BottomFrame) {
 // 	}
 // }
 
-
 func main() {
 	ansi.CursorHide()
 	lines := 5
-	frame := jotframe.NewBottomFrame(lines, true, true)
+	frame := jotframe.NewFixedFrameAt(lines, true, true, false, 20)
 
 	rand.Seed(time.Now().Unix())
 
@@ -68,7 +67,7 @@ func main() {
 	frame.AppendTrail("The third trailer...")
 	frame.AppendTrail("The fourth trailer...")
 
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	// time.Sleep(time.Duration(1000) * time.Millisecond)
 	for idx := 0; idx < lines; idx++ {
 		go renderLine(idx, frame.Lines()[idx], frame)
 	}
@@ -76,7 +75,7 @@ func main() {
 	frame.AppendTrail("The LAST trailer...")
 
 	for idx := 0; idx < lines; idx++ {
-		time.Sleep(time.Duration(1000) * time.Millisecond)
+		time.Sleep(time.Duration(200) * time.Millisecond)
 		// frame.AppendTrail(fmt.Sprintf("The %d trailer...", idx))
 		line, err := frame.Append()
 		if err != nil {
@@ -85,10 +84,10 @@ func main() {
 		go renderLine(lines + idx, line, frame)
 	}
 
-	time.Sleep(time.Duration(1000)*time.Millisecond)
+	time.Sleep(time.Duration(200)*time.Millisecond)
 
 	for idx := len(frame.Lines())-1; idx > 0; idx-- {
-		time.Sleep(time.Duration(1000) * time.Millisecond)
+		time.Sleep(time.Duration(200) * time.Millisecond)
 		// frame.Lines()[idx].ClearAndClose()
 		frame.Remove(frame.Lines()[idx])
 	}
@@ -96,6 +95,51 @@ func main() {
 	frame.ClearAndClose()
 	ansi.CursorShow()
 }
+
+
+// func main() {
+// 	ansi.CursorHide()
+// 	lines := 5
+// 	frame := jotframe.NewBottomFrame(lines, true, true, true)
+//
+// 	rand.Seed(time.Now().Unix())
+//
+// 	frame.Header().WriteString("header!")
+// 	frame.Footer().WriteString("footer!")
+//
+// 	frame.AppendTrail("The first trailer...")
+// 	frame.AppendTrail("The second trailer...")
+// 	frame.AppendTrail("The third trailer...")
+// 	frame.AppendTrail("The fourth trailer...")
+//
+// 	// time.Sleep(time.Duration(1000) * time.Millisecond)
+// 	for idx := 0; idx < lines; idx++ {
+// 		go renderLine(idx, frame.Lines()[idx], frame)
+// 	}
+//
+// 	frame.AppendTrail("The LAST trailer...")
+//
+// 	for idx := 0; idx < lines; idx++ {
+// 		time.Sleep(time.Duration(200) * time.Millisecond)
+// 		// frame.AppendTrail(fmt.Sprintf("The %d trailer...", idx))
+// 		line, err := frame.Append()
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		go renderLine(lines + idx, line, frame)
+// 	}
+//
+// 	time.Sleep(time.Duration(200)*time.Millisecond)
+//
+// 	for idx := len(frame.Lines())-1; idx > 0; idx-- {
+// 		time.Sleep(time.Duration(200) * time.Millisecond)
+// 		// frame.Lines()[idx].ClearAndClose()
+// 		frame.Remove(frame.Lines()[idx])
+// 	}
+//
+// 	frame.ClearAndClose()
+// 	ansi.CursorShow()
+// }
 
 // func main() {
 // 	ansi.CursorHide()
