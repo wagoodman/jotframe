@@ -9,6 +9,7 @@ import (
 	"strings"
 	"regexp"
 	"strconv"
+	"github.com/k0kubun/go-ansi"
 )
 
 var (
@@ -16,8 +17,27 @@ var (
 	screenLock *sync.Mutex
 )
 
+func advanceScreen(rows int) {
+	setCursorRow(terminalHeight)
+	fmt.Print(strings.Repeat("\n", rows))
+}
+
+func writeAtRow(message string, row int) {
+	setCursorRow(row)
+	fmt.Print(strings.Replace(message, "\n", "", -1))
+}
+
 func clearScreen() {
 	fmt.Print("\x1b[2J")
+}
+
+func clearRow(row int) error {
+	err := setCursorRow(row)
+	if err != nil {
+		return err
+	}
+	ansi.EraseInLine(2)
+	return nil
 }
 
 func getScreenLock() *sync.Mutex {

@@ -15,12 +15,13 @@ type Line struct {
 }
 
 type logicalFrame struct  {
-	header      *Line
-	activeLines []*Line
-	clearLines  []*Line
-	footer      *Line
+	header             *Line
+	activeLines        []*Line
+	clearRows          []int
+	trailRows          []string
+	rowPreAdvancements int
+	footer             *Line
 
-	lock          *sync.Mutex
 	frameStartIdx int
 	updateFn      func() error
 	closed        bool
@@ -29,12 +30,15 @@ type logicalFrame struct  {
 
 type TopFrame struct {
 	frame *logicalFrame
+	lock          *sync.Mutex
 }
 
 type BottomFrame struct {
 	frame *logicalFrame
+	lock          *sync.Mutex
 }
 
 type FixedFrame struct {
 	frame *logicalFrame
+	lock          *sync.Mutex
 }

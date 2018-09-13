@@ -5,14 +5,13 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bottom_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/bottom_frame.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixed_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/logical_frame.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixed_frame_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/logical_frame_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/types.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixed_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/fixed_frame.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/line.go" beforeDir="false" afterPath="$PROJECT_DIR$/line.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logical_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/logical_frame.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/root.go" beforeDir="false" afterPath="$PROJECT_DIR$/root.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screen.go" beforeDir="false" afterPath="$PROJECT_DIR$/screen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/signal.go" beforeDir="false" afterPath="$PROJECT_DIR$/signal.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/top_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/top_frame.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/types.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -28,8 +27,8 @@
           <file leaf-file-name="line.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/line.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="870">
-                  <caret line="30" column="1" lean-forward="true" selection-start-line="30" selection-start-column="1" selection-end-line="30" selection-end-column="1" />
+                <state relative-caret-position="174">
+                  <caret line="57" column="14" selection-start-line="57" selection-start-column="14" selection-end-line="57" selection-end-column="14" />
                   <folding>
                     <element signature="e#18#125#0" expanded="true" />
                   </folding>
@@ -50,7 +49,7 @@
             <entry file="file://$PROJECT_DIR$/screen.go">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="522">
-                  <caret line="18" column="6" selection-start-line="18" selection-start-column="6" selection-end-line="18" selection-end-column="6" />
+                  <caret line="27" column="1" selection-start-line="27" selection-start-column="1" selection-end-line="27" selection-end-column="1" />
                   <folding>
                     <element signature="e#18#126#0" expanded="true" />
                   </folding>
@@ -58,11 +57,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="bottom_frame.go" pinned="false" current-in-tab="false">
+          <file leaf-file-name="bottom_frame.go" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/bottom_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="656">
-                  <caret line="61" column="19" selection-start-line="61" selection-start-column="19" selection-end-line="62" selection-end-column="7" />
+                <state relative-caret-position="1189">
+                  <caret line="83" column="23" selection-start-line="83" selection-start-column="23" selection-end-line="83" selection-end-column="23" />
                 </state>
               </provider>
             </entry>
@@ -70,17 +69,17 @@
           <file leaf-file-name="top_frame.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/top_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1117">
-                  <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
+                <state relative-caret-position="1175">
+                  <caret line="77" selection-start-line="77" selection-end-line="77" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="fixed_frame.go" pinned="false" current-in-tab="true">
+          <file leaf-file-name="fixed_frame.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/fixed_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-188">
-                  <caret line="32" column="1" lean-forward="true" selection-start-line="32" selection-start-column="1" selection-end-line="32" selection-end-column="1" />
+                <state relative-caret-position="1218">
+                  <caret line="69" column="1" lean-forward="true" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
                 </state>
               </provider>
             </entry>
@@ -92,11 +91,8 @@
           <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/examples/main.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="551">
-                  <caret line="69" lean-forward="true" selection-start-line="69" selection-end-line="69" />
-                  <folding>
-                    <element signature="e#14#91#0" expanded="true" />
-                  </folding>
+                <state relative-caret-position="290">
+                  <caret line="64" column="4" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="4" />
                 </state>
               </provider>
             </entry>
@@ -104,8 +100,8 @@
           <file leaf-file-name="root.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/root.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="899">
-                  <caret line="31" column="32" selection-start-line="31" selection-start-column="32" selection-end-line="31" selection-end-column="32" />
+                <state relative-caret-position="1189">
+                  <caret line="41" selection-start-line="41" selection-end-line="41" />
                 </state>
               </provider>
             </entry>
@@ -122,8 +118,8 @@
           <file leaf-file-name="logical_frame.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/logical_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="519">
-                  <caret line="197" lean-forward="true" selection-start-line="197" selection-end-line="197" />
+                <state relative-caret-position="3912">
+                  <caret line="239" column="77" selection-start-line="239" selection-start-column="77" selection-end-line="239" selection-end-column="77" />
                 </state>
               </provider>
             </entry>
@@ -131,8 +127,8 @@
           <file leaf-file-name="types.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/types.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="696">
-                  <caret line="24" column="12" selection-start-line="24" selection-start-column="4" selection-end-line="24" selection-end-column="12" />
+                <state relative-caret-position="609">
+                  <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
                   <folding>
                     <element signature="e#18#36#0" expanded="true" />
                   </folding>
@@ -163,6 +159,10 @@
       <find>TopFrame</find>
       <find>frame.updateAndDraw()</find>
       <find>.clear</find>
+      <find>clearLines</find>
+      <find>lock</find>
+      <find>frame.frame.lock</find>
+      <find>adva</find>
     </findStrings>
     <replaceStrings>
       <replace>frame.updateAndDraw()</replace>
@@ -170,6 +170,8 @@
       <replace>FixedFrame</replace>
       <replace>frame.frame.updateAndDraw()</replace>
       <replace>frame is closed</replace>
+      <replace>frame.lock</replace>
+      <replace>clearRows</replace>
     </replaceStrings>
   </component>
   <component name="GOROOT" path="/usr/lib/golang" />
@@ -190,14 +192,14 @@
         <option value="$PROJECT_DIR$/frame.go" />
         <option value="$PROJECT_DIR$/signal.go" />
         <option value="$PROJECT_DIR$/line.go" />
-        <option value="$PROJECT_DIR$/screen.go" />
-        <option value="$PROJECT_DIR$/examples/main.go" />
-        <option value="$PROJECT_DIR$/types.go" />
-        <option value="$PROJECT_DIR$/bottom_frame.go" />
         <option value="$PROJECT_DIR$/top_frame.go" />
         <option value="$PROJECT_DIR$/fixed_frame.go" />
-        <option value="$PROJECT_DIR$/logical_frame.go" />
         <option value="$PROJECT_DIR$/root.go" />
+        <option value="$PROJECT_DIR$/screen.go" />
+        <option value="$PROJECT_DIR$/bottom_frame.go" />
+        <option value="$PROJECT_DIR$/types.go" />
+        <option value="$PROJECT_DIR$/logical_frame.go" />
+        <option value="$PROJECT_DIR$/examples/main.go" />
       </list>
     </option>
   </component>
@@ -371,13 +373,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/screen.go">
+    <entry file="file://$PROJECT_DIR$/signal.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="18" column="6" selection-start-line="18" selection-start-column="6" selection-end-line="18" selection-end-column="6" />
-          <folding>
-            <element signature="e#18#126#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="783">
+          <caret line="32" column="45" selection-start-line="32" selection-start-column="45" selection-end-line="32" selection-end-column="45" />
         </state>
       </provider>
     </entry>
@@ -388,75 +387,75 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/root.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1189">
+          <caret line="41" selection-start-line="41" selection-end-line="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/top_frame.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1175">
+          <caret line="77" selection-start-line="77" selection-end-line="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixed_frame.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1218">
+          <caret line="69" column="1" lean-forward="true" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/line.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="30" column="1" lean-forward="true" selection-start-line="30" selection-start-column="1" selection-end-line="30" selection-end-column="1" />
+        <state relative-caret-position="174">
+          <caret line="57" column="14" selection-start-line="57" selection-start-column="14" selection-end-line="57" selection-end-column="14" />
           <folding>
             <element signature="e#18#125#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/screen.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="522">
+          <caret line="27" column="1" selection-start-line="27" selection-start-column="1" selection-end-line="27" selection-end-column="1" />
+          <folding>
+            <element signature="e#18#126#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bottom_frame.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="61" column="19" selection-start-line="61" selection-start-column="19" selection-end-line="62" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/top_frame.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1117">
-          <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fixed_frame.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-188">
-          <caret line="32" column="1" lean-forward="true" selection-start-line="32" selection-start-column="1" selection-end-line="32" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/logical_frame.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="519">
-          <caret line="197" lean-forward="true" selection-start-line="197" selection-end-line="197" />
+        <state relative-caret-position="1189">
+          <caret line="83" column="23" selection-start-line="83" selection-start-column="23" selection-end-line="83" selection-end-column="23" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/types.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="696">
-          <caret line="24" column="12" selection-start-line="24" selection-start-column="4" selection-end-line="24" selection-end-column="12" />
+        <state relative-caret-position="609">
+          <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
           <folding>
             <element signature="e#18#36#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/signal.go">
+    <entry file="file://$PROJECT_DIR$/logical_frame.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="783">
-          <caret line="32" column="45" selection-start-line="32" selection-start-column="45" selection-end-line="32" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/root.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="899">
-          <caret line="31" column="32" selection-start-line="31" selection-start-column="32" selection-end-line="31" selection-end-column="32" />
+        <state relative-caret-position="3912">
+          <caret line="239" column="77" selection-start-line="239" selection-start-column="77" selection-end-line="239" selection-end-column="77" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="69" lean-forward="true" selection-start-line="69" selection-end-line="69" />
-          <folding>
-            <element signature="e#14#91#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="290">
+          <caret line="64" column="4" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="4" />
         </state>
       </provider>
     </entry>

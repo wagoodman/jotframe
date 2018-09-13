@@ -53,11 +53,10 @@ func (line *Line) Clear() error {
 
 func (line *Line) clear(preserveBuffer bool) error {
 
-	err := setCursorRow(line.row)
+	err := clearRow(line.row)
 	if err != nil {
 		return err
 	}
-	ansi.EraseInLine(2)
 
 	if !preserveBuffer {
 		line.buffer = []byte("")
@@ -95,11 +94,10 @@ func (line *Line) Write(buff []byte) (int, error) {
 
 func (line *Line) write(buff []byte) (int, error) {
 
-	err := setCursorRow(line.row)
+	err := clearRow(line.row)
 	if err != nil {
 		return -1, err
 	}
-	ansi.EraseInLine(2)
 	ansi.CursorHorizontalAbsolute(0)
 
 	line.buffer = []byte(strings.Split(string(buff), "\n")[0])

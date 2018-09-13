@@ -1,14 +1,15 @@
 package jotframe
 
 
-func NewTopFrame(rows int, hasHeader, hasFooter bool) (*TopFrame, error) {
-	innerFrame, err := newLogicalFrameAt(rows, hasHeader, hasFooter, 0)
+func NewTopFrame(rows int, hasHeader, hasFooter bool) *TopFrame {
+	innerFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, 1)
 	frame := &TopFrame{
 		frame: innerFrame,
+		lock: getScreenLock(),
 	}
 	frame.frame.updateFn = frame.update
 
-	return frame, err
+	return frame
 }
 
 func (frame *TopFrame) Header() *Line {
@@ -24,40 +25,57 @@ func (frame *TopFrame) Lines() []*Line {
 }
 
 func (frame *TopFrame) Append() (*Line, error) {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
-	return frame.frame.Append()
+	return frame.frame.append()
 }
 
 func (frame *TopFrame) Prepend() (*Line, error) {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
-	return frame.frame.Prepend()
+	return frame.frame.prepend()
 }
 
 func (frame *TopFrame) Insert(index int) (*Line, error) {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
-	return frame.frame.Insert(index)
+	return frame.frame.insert(index)
 }
 
 func (frame *TopFrame) Remove(line *Line) error {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
-	return frame.frame.Remove(line)
+	return frame.frame.remove(line)
 }
 
 func (frame *TopFrame) Close() error {
-	return frame.frame.Close()
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
+	return frame.frame.close()
 }
 
 func (frame *TopFrame) Clear() error {
-	frame.frame.lock.Lock()
-	defer frame.frame.lock.Unlock()
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
 
 	return frame.frame.clear()
 }
 
 func (frame *TopFrame) ClearAndClose() error {
-	frame.frame.lock.Lock()
-	defer frame.frame.lock.Unlock()
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+
 	defer frame.frame.updateAndDraw()
 
 	err := frame.frame.clear()
@@ -69,20 +87,9 @@ func (frame *TopFrame) ClearAndClose() error {
 
 // update any positions based on external data and redraw
 func (frame *TopFrame) update() error {
-	// height := len(frame.frame.activeLines)
-	// if frame.frame.header != nil {
-	// 	height++
-	// }
-	// if frame.frame.footer != nil {
-	// 	height++
-	// }
-	//
-	// targetFrameStartIndex := (terminalHeight - height)+1
-	// if frame.frame.frameStartIdx != targetFrameStartIndex {
-	// 	// reset the frame and all activeLines to the correct offset
-	// 	offset := targetFrameStartIndex - frame.frame.frameStartIdx
-	//
-	// 	return frame.frame.move(offset)
-	// }
+	if frame.frame.frameStartIdx != 1 {
+		offset := 1 - frame.frame.frameStartIdx
+		return frame.frame.move(offset)
+	}
 	return nil
 }

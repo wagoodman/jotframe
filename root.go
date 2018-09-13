@@ -36,9 +36,12 @@ func refresh() error {
 }
 
 func Close() error {
-	// each logicalFrame.Close() will implicitly lock
+	lock := getScreenLock()
+	lock.Lock()
+	defer lock.Unlock()
+
 	for _, frame := range allFrames {
-		err := frame.Close()
+		err := frame.close()
 		if err != nil {
 			return err
 		}
