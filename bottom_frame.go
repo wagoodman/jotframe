@@ -63,6 +63,11 @@ func (frame *BottomFrame) Prepend() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
+	// appended rows should appear to move upwards on the screen, which means that we should
+	// move the entire frame upwards 1 line while making more screen space by 1 line
+	frame.frame.move(-1)
+	frame.frame.rowPreAdvancements += 1
+
 	return frame.frame.prepend()
 }
 
@@ -70,6 +75,11 @@ func (frame *BottomFrame) Insert(index int) (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
+
+	// appended rows should appear to move upwards on the screen, which means that we should
+	// move the entire frame upwards 1 line while making more screen space by 1 line
+	frame.frame.move(-1)
+	frame.frame.rowPreAdvancements += 1
 
 	return frame.frame.insert(index)
 }

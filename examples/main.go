@@ -62,7 +62,7 @@ func main() {
 
 	frame.Header().WriteString("header!")
 	frame.Footer().WriteString("footer!")
-	
+
 	frame.AppendTrail("The first trailer...")
 	frame.AppendTrail("The second trailer...")
 	frame.AppendTrail("The third trailer...")

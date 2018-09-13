@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="beb82692-25de-4632-a319-35bd1bb87beb" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bottom_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/bottom_frame.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixed_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/fixed_frame.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/line.go" beforeDir="false" afterPath="$PROJECT_DIR$/line.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logical_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/logical_frame.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/root.go" beforeDir="false" afterPath="$PROJECT_DIR$/root.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/screen.go" beforeDir="false" afterPath="$PROJECT_DIR$/screen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/top_frame.go" beforeDir="false" afterPath="$PROJECT_DIR$/top_frame.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/types.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -60,8 +52,8 @@
           <file leaf-file-name="bottom_frame.go" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/bottom_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1189">
-                  <caret line="83" column="23" selection-start-line="83" selection-start-column="23" selection-end-line="83" selection-end-column="23" />
+                <state relative-caret-position="1218">
+                  <caret line="81" column="39" selection-start-line="81" selection-start-column="39" selection-end-line="81" selection-end-column="39" />
                 </state>
               </provider>
             </entry>
@@ -88,11 +80,11 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+          <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/examples/main.go">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="290">
-                  <caret line="64" column="4" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="4" />
+                  <caret line="64" selection-start-line="64" selection-end-line="64" />
                 </state>
               </provider>
             </entry>
@@ -115,10 +107,10 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="logical_frame.go" pinned="false" current-in-tab="false">
+          <file leaf-file-name="logical_frame.go" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/logical_frame.go">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="3912">
+                <state relative-caret-position="-90">
                   <caret line="239" column="77" selection-start-line="239" selection-start-column="77" selection-end-line="239" selection-end-column="77" />
                 </state>
               </provider>
@@ -196,10 +188,10 @@
         <option value="$PROJECT_DIR$/fixed_frame.go" />
         <option value="$PROJECT_DIR$/root.go" />
         <option value="$PROJECT_DIR$/screen.go" />
-        <option value="$PROJECT_DIR$/bottom_frame.go" />
         <option value="$PROJECT_DIR$/types.go" />
         <option value="$PROJECT_DIR$/logical_frame.go" />
         <option value="$PROJECT_DIR$/examples/main.go" />
+        <option value="$PROJECT_DIR$/bottom_frame.go" />
       </list>
     </option>
   </component>
@@ -428,13 +420,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bottom_frame.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1189">
-          <caret line="83" column="23" selection-start-line="83" selection-start-column="23" selection-end-line="83" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/types.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="609">
@@ -445,17 +430,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/examples/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="290">
+          <caret line="64" selection-start-line="64" selection-end-line="64" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/logical_frame.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3912">
+        <state relative-caret-position="-90">
           <caret line="239" column="77" selection-start-line="239" selection-start-column="77" selection-end-line="239" selection-end-column="77" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/main.go">
+    <entry file="file://$PROJECT_DIR$/bottom_frame.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="64" column="4" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="4" />
+        <state relative-caret-position="1218">
+          <caret line="81" column="39" selection-start-line="81" selection-start-column="39" selection-end-line="81" selection-end-column="39" />
         </state>
       </provider>
     </entry>
