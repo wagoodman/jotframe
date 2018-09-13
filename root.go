@@ -1,9 +1,9 @@
 package jotframe
 
 var (
-	terminalWidth  int
-	terminalHeight int
-	allFrames      = make([]*logicalFrame, 0)
+	terminalWidth     int
+	terminalHeight    int
+	allFrames = make([]*logicalFrame, 0)
 )
 
 func registerFrame(frame *logicalFrame) {

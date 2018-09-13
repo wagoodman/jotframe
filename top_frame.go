@@ -9,6 +9,10 @@ func NewTopFrame(rows int, hasHeader, hasFooter bool) *TopFrame {
 	}
 	frame.frame.updateFn = frame.update
 
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+	defer frame.frame.updateAndDraw()
+
 	return frame
 }
 

@@ -19,6 +19,18 @@ func NewFixedFrameAt(rows int, hasHeader, hasFooter, includeTrailOnRemove bool, 
 	}
 	frame.frame.updateFn = nil
 
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+	defer frame.frame.updateAndDraw()
+
+	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
+	if frame.frame.isAtOrPastScreenBottom() {
+		height := frame.frame.height()
+		offset := frame.frame.frameStartIdx - ((terminalHeight - height)+1)
+		frame.frame.move(-offset)
+		frame.frame.rowAdvancements += offset
+	}
+
 	return frame
 }
 
@@ -41,14 +53,24 @@ func (frame *FixedFrame) AppendTrail(str string) {
 
 	// write the removed line to the trail log + move the frame down (while advancing the frame)
 	frame.frame.appendTrail(str)
-	// frame.frame.move(1)
-	frame.frame.rowPreAdvancements += 1
+	if frame.frame.isAtOrPastScreenBottom() {
+		// frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	} else {
+		frame.frame.move(1)
+	}
 }
 
 func (frame *FixedFrame) Append() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
+
+	if frame.frame.isAtOrPastScreenBottom() {
+		// make more screen realestate
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
 
 	return frame.frame.append()
 }
@@ -58,6 +80,12 @@ func (frame *FixedFrame) Prepend() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
+	if frame.frame.isAtOrPastScreenBottom() {
+		// make more screen realestate
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
+
 	return frame.frame.prepend()
 }
 
@@ -65,6 +93,12 @@ func (frame *FixedFrame) Insert(index int) (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
+
+	if frame.frame.isAtOrPastScreenBottom() {
+		// make more screen realestate
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
 
 	return frame.frame.insert(index)
 }
@@ -77,8 +111,8 @@ func (frame *FixedFrame) Remove(line *Line) error {
 	if frame.trailOnRemove {
 		// write the removed line to the trail log + move the frame down
 		frame.frame.appendTrail(string(line.buffer))
+		frame.frame.move(1)
 	}
-	frame.frame.move(1)
 
 	return frame.frame.remove(line)
 }

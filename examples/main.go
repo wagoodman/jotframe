@@ -23,7 +23,7 @@ func randomString(len int) string {
 	return string(bytes)
 }
 
-func renderLine(idx int, line *jotframe.Line, frame *jotframe.FixedFrame) {
+func renderLine(idx int, line *jotframe.Line, frame *jotframe.BottomFrame) {
 	message := fmt.Sprintf("%s %s INITIALIZED", line, time.Now())
 	io.WriteString(line, message)
 	for {
@@ -55,18 +55,21 @@ func renderLine(idx int, line *jotframe.Line, frame *jotframe.FixedFrame) {
 func main() {
 	ansi.CursorHide()
 	lines := 5
-	frame := jotframe.NewFixedFrameAt(lines, true, true, false, 20)
-
+	frame := jotframe.NewBottomFrame(lines, true, true, true)
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	rand.Seed(time.Now().Unix())
 
 	frame.Header().WriteString("header!")
 	frame.Footer().WriteString("footer!")
-
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	frame.AppendTrail("The first trailer...")
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	frame.AppendTrail("The second trailer...")
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	frame.AppendTrail("The third trailer...")
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	frame.AppendTrail("The fourth trailer...")
-
+	time.Sleep(time.Duration(700) * time.Millisecond)
 	// time.Sleep(time.Duration(1000) * time.Millisecond)
 	for idx := 0; idx < lines; idx++ {
 		go renderLine(idx, frame.Lines()[idx], frame)

@@ -15,12 +15,12 @@ type Line struct {
 }
 
 type logicalFrame struct  {
-	header             *Line
-	activeLines        []*Line
-	clearRows          []int
-	trailRows          []string
-	rowPreAdvancements int
-	footer             *Line
+	header          *Line
+	activeLines     []*Line
+	clearRows       []int
+	trailRows       []string
+	rowAdvancements int
+	footer          *Line
 
 	frameStartIdx int
 	updateFn      func() error

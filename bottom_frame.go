@@ -9,7 +9,7 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bo
 		height++
 	}
 
-	// todo: why plus 1?
+	// the screen index starts at 1 (not 0), hence the +1
 	frameTopRow := (terminalHeight - height) + 1
 
 	innerFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, frameTopRow)
@@ -19,6 +19,24 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bo
 		trailOnRemove: includeTrailOnRemove,
 	}
 	frame.frame.updateFn = frame.update
+
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+	defer frame.frame.updateAndDraw()
+
+	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
+	// one assumption is made: the current cursor position is where history (may) start.
+	frameHeight := frame.frame.height()
+	currentRow, err := GetCursorRow()
+	if err != nil {
+		panic(err)
+	}
+
+	// if we start drawing now, we'll be past the bottom of the screen, preserve the current terminal history
+	if currentRow + frameHeight > terminalHeight {
+		offset := currentRow - ((terminalHeight - height)+1)
+		frame.frame.rowAdvancements += offset
+	}
 
 	return frame
 }
@@ -43,7 +61,7 @@ func (frame *BottomFrame) AppendTrail(str string) {
 	// write the removed line to the trail log + move the frame down (while advancing the frame)
 	frame.frame.appendTrail(str)
 	// frame.frame.move(1)
-	frame.frame.rowPreAdvancements += 1
+	frame.frame.rowAdvancements += 1
 }
 
 func (frame *BottomFrame) Append() (*Line, error) {
@@ -54,7 +72,7 @@ func (frame *BottomFrame) Append() (*Line, error) {
 	// appended rows should appear to move upwards on the screen, which means that we should
 	// move the entire frame upwards 1 line while making more screen space by 1 line
 	frame.frame.move(-1)
-	frame.frame.rowPreAdvancements += 1
+	frame.frame.rowAdvancements += 1
 
 	return frame.frame.append()
 }
@@ -67,7 +85,7 @@ func (frame *BottomFrame) Prepend() (*Line, error) {
 	// appended rows should appear to move upwards on the screen, which means that we should
 	// move the entire frame upwards 1 line while making more screen space by 1 line
 	frame.frame.move(-1)
-	frame.frame.rowPreAdvancements += 1
+	frame.frame.rowAdvancements += 1
 
 	return frame.frame.prepend()
 }
@@ -80,7 +98,7 @@ func (frame *BottomFrame) Insert(index int) (*Line, error) {
 	// appended rows should appear to move upwards on the screen, which means that we should
 	// move the entire frame upwards 1 line while making more screen space by 1 line
 	frame.frame.move(-1)
-	frame.frame.rowPreAdvancements += 1
+	frame.frame.rowAdvancements += 1
 
 	return frame.frame.insert(index)
 }
@@ -133,7 +151,7 @@ func (frame *BottomFrame) update() error {
 	if frame.frame.frameStartIdx != targetFrameStartIndex {
 		// reset the frame and all activeLines to the correct offset. This must be done with new
 		// lines since we should not overwrite the trail rows above the frame.
-		frame.frame.rowPreAdvancements += frame.frame.frameStartIdx - targetFrameStartIndex
+		frame.frame.rowAdvancements += frame.frame.frameStartIdx - targetFrameStartIndex
 	}
 	return nil
 }

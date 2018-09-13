@@ -41,6 +41,19 @@ func (frame *logicalFrame) height() int {
 	return height
 }
 
+func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
+	height := frame.height()
+
+	// take into account the rows that will be added to the screen realestate
+	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
+
+	// if the frame has moved past the bottom of the screen, move it up a bit
+	if futureFrameStartIdx + height > terminalHeight {
+		return true
+	}
+	return false
+}
+
 func (frame *logicalFrame) append() (*Line, error) {
 	if frame.closed {
 		return nil, fmt.Errorf("frame is closed")
@@ -238,7 +251,7 @@ func (frame *logicalFrame) update() error {
 	height := frame.height()
 
 	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.frameStartIdx - frame.rowPreAdvancements
+	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
 
 	// if the frame has moved past the bottom of the screen, move it up a bit
 	if futureFrameStartIdx + height > terminalHeight {
@@ -262,7 +275,7 @@ func (frame *logicalFrame) updateAndDraw() {
 	}
 
 	// don't allow any update function to draw outside of the screen dimensions
-	frame.update()
+	// frame.update()
 
 	frame.draw()
 }
@@ -279,7 +292,7 @@ func (frame *logicalFrame) draw() error {
 	frame.clearRows = make([]int, 0)
 
 	// advance the screen while adding any trail lines
-	for idx := 0; idx < frame.rowPreAdvancements; idx++ {
+	for idx := 0; idx < frame.rowAdvancements; idx++ {
 		advanceScreen(1)
 		if idx < len(frame.trailRows) {
 			writeAtRow(frame.trailRows[0], frame.frameStartIdx - len(frame.trailRows) + idx)
@@ -290,7 +303,7 @@ func (frame *logicalFrame) draw() error {
 			}
 		}
 	}
-	frame.rowPreAdvancements = 0
+	frame.rowAdvancements = 0
 
 	// append any remaining trail rows
 	for idx, message := range frame.trailRows {
