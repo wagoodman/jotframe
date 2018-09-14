@@ -5,6 +5,15 @@ import (
 	"strconv"
 )
 
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func Test_NewLogicalFrame(t *testing.T) {
 
 	tables := []struct {
@@ -184,7 +193,6 @@ func Test_LogicalFrame_Append(t *testing.T) {
 
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
-
 		for idx, expectedRow := range table.expectedLineRows {
 			actualRow = frame.activeLines[idx].row
 			if expectedRow != actualRow {
@@ -249,7 +257,6 @@ func Test_LogicalFrame_Prepend(t *testing.T) {
 
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
-
 		for idx, expectedRow := range table.expectedLineRows {
 			actualRow = frame.activeLines[idx].row
 			if expectedRow != actualRow {
@@ -309,7 +316,6 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
-
 		for idx, expectedRow := range table.expectedLineRows {
 			actualRow = frame.activeLines[idx].row
 			if expectedRow != actualRow {
@@ -321,58 +327,236 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 
 
 
-// func Test_LogicalFrame_Remove(t *testing.T) {
-//
-// 	tables := []struct {
-// 		startRows         int
-// 		hasHeader         bool
-// 		hasFooter         bool
-// 		destinationRow    int
-// 		expectedHeaderRow int
-// 		expectedFooterRow int
-// 		expectedLineRows  []int
-// 	}{
-// 		{6, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14} },
-// 		{6, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15} },
-// 		{6, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14} },
-// 		{6, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15} },
-// 	}
-//
-// 	for _, table := range tables {
-// 		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
-// 		rmIdx := 2
-//
-// 		// add content to rows
-// 		for idx, line := range frame.activeLines {
-// 			line.buffer = []byte(strconv.Itoa(idx))
-// 		}
-//
-// 		// check if the number of rows matches
-// 		if len(frame.activeLines) != table.startRows {
-// 			t.Errorf("LogicalFrame.append(): expected %d number of lines, got %d", table.startRows, len(frame.activeLines))
-// 		}
-//
-// 		// check the contents of each line
-// 		for idx := 0; idx < table.startRows; idx++ {
-// 			line := frame.activeLines[idx]
-// 			actualNum, err := strconv.Atoi(string(line.buffer))
-// 			if err != nil {
-// 				t.Errorf("LogicalFrame.append(): expected no error on line read (%v), got %v", actualNum, err)
-// 			}
-//
-// 			if actualNum != idx {
-// 				t.Errorf("LogicalFrame.append(): expected %d, got %d", idx, actualNum)
-// 			}
-// 		}
-//
-// 		// ensure the screen row values are correct relative to the given starting row
-// 		var actualRow int
-//
-// 		for idx, expectedRow := range table.expectedLineRows {
-// 			actualRow = frame.activeLines[idx].row
-// 			if expectedRow != actualRow {
-// 				t.Errorf("LogicalFrame.append(): expected line row to start at %d, but starts at %d", expectedRow, actualRow)
-// 			}
-// 		}
-// 	}
-// }
+func Test_LogicalFrame_Remove(t *testing.T) {
+
+	tables := []struct {
+		startRows         int
+		hasHeader         bool
+		hasFooter         bool
+		destinationRow    int
+		expectedLineRows  []int
+	}{
+		{6, false, false, 10, []int{10, 11, 12, 13, 14} },
+		{6, true, false, 10, []int{11, 12, 13, 14, 15} },
+		{6, false, true, 10, []int{10, 11, 12, 13, 14} },
+		{6, true, true, 10, []int{11, 12, 13, 14, 15} },
+	}
+
+	for _, table := range tables {
+		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
+		rmIdx := 2
+
+		// add content to rows
+		for idx, line := range frame.activeLines {
+			line.buffer = []byte(strconv.Itoa(idx))
+		}
+
+		// remove a single index
+		frame.remove(frame.activeLines[rmIdx])
+
+		// check if the number of rows matches
+		if len(frame.activeLines) != table.startRows-1 {
+			t.Errorf("LogicalFrame.remove(): expected %d number of lines, got %d", table.startRows, len(frame.activeLines))
+		}
+
+		// check the contents of each line
+		for idx := 0; idx < table.startRows-1; idx++ {
+			line := frame.activeLines[idx]
+			actualNum, err := strconv.Atoi(string(line.buffer))
+			if err != nil {
+				t.Errorf("LogicalFrame.remove(): expected no error on line read (%v), got %v", actualNum, err)
+			}
+
+			if idx < rmIdx && actualNum != idx {
+				t.Errorf("LogicalFrame.remove(): expected %d, got %d", idx, actualNum)
+			} else if idx >= rmIdx && actualNum != idx+1 {
+				t.Errorf("LogicalFrame.remove(): expected %d, got %d", idx, actualNum)
+			}
+		}
+
+		// ensure the screen row values are correct relative to the given starting row
+		var actualRow int
+		for idx, expectedRow := range table.expectedLineRows {
+			actualRow = frame.activeLines[idx].row
+			if expectedRow != actualRow {
+				t.Errorf("LogicalFrame.remove(): expected line row to start at %d, but starts at %d (idx:%d)", expectedRow, actualRow, idx)
+			}
+		}
+	}
+}
+
+
+func Test_LogicalFrame_Clear(t *testing.T) {
+
+	tables := []struct {
+		startRows           int
+		hasHeader           bool
+		hasFooter           bool
+		destinationRow      int
+		expectedClearRows  []int
+	}{
+		{5, false, false, 10, []int{10, 11, 12, 13, 14}},
+		{5, true, false, 10, []int{10, 11, 12, 13, 14, 15} },
+		{5, false, true, 10, []int{10, 11, 12, 13, 14, 15} },
+		{5, true, true, 10, []int{10, 11, 12, 13, 14, 15, 16} },
+	}
+
+	for _, table := range tables {
+		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
+		err := frame.clear()
+		if err != nil {
+			t.Errorf("LogicalFrame.clear(): expected no error on clear(), got %v", err)
+		}
+
+		height := table.startRows
+		if table.hasHeader {
+			height++
+		}
+		if table.hasFooter {
+			height++
+		}
+
+		expectedRows := height
+		actualRows := len(frame.clearRows)
+		if expectedRows != actualRows {
+			t.Errorf("LogicalFrame.clear(): expected number of lines cleared to be %d, but is %d", expectedRows, actualRows)
+		}
+
+		for _, expectedRow := range table.expectedClearRows {
+			if !contains(frame.clearRows, expectedRow) {
+				t.Errorf("LogicalFrame.clear(): expected %d to be in clear rows but is not", expectedRow)
+			}
+		}
+
+	}
+}
+
+func Test_LogicalFrame_Close(t *testing.T) {
+
+	tables := []struct {
+		startRows           int
+		hasHeader           bool
+		hasFooter           bool
+		destinationRow      int
+	}{
+		{5, false, false, 10},
+		{5, true, false, 10 },
+		{5, false, true, 10 },
+		{5, true, true, 10 },
+	}
+
+	for _, table := range tables {
+		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
+		err := frame.close()
+		if err != nil {
+			t.Errorf("LogicalFrame.close(): expected no error on close(), got %v", err)
+		}
+
+		if !frame.closed {
+			t.Errorf("LogicalFrame.close(): expected frame to be closed but is not")
+		}
+
+		if table.hasHeader && !frame.header.closed {
+			t.Errorf("LogicalFrame.close(): expected header to be closed but is not")
+		}
+		if table.hasFooter && !frame.footer.closed {
+			t.Errorf("LogicalFrame.close(): expected footer to be closed but is not")
+		}
+
+		for idx, line := range frame.activeLines {
+			if !line.closed {
+				t.Errorf("LogicalFrame.close(): expected line %d to be closed but is not", idx)
+			}
+		}
+	}
+}
+
+func Test_LogicalFrame_Move(t *testing.T) {
+
+	tables := []struct {
+		startRows           int
+		hasHeader           bool
+		hasFooter           bool
+		destinationRow      int
+		moveRows            int
+	}{
+		{5, false, false, 10, 5 },
+		{5, true, false, 10, -5 },
+		{5, false, true, 10, 5 },
+		{5, true, true, 10, -5 },
+	}
+
+	for _, table := range tables {
+		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
+		err := frame.move(table.moveRows)
+		if err != nil {
+			t.Errorf("LogicalFrame.move(): expected no error on move(), got %v", err)
+		}
+
+		expectedFrameRow := table.destinationRow + table.moveRows
+		actualFrameRow := frame.frameStartIdx
+		if expectedFrameRow != actualFrameRow {
+			t.Errorf("LogicalFrame.move(): expected frame to be at %d, but is at %d", expectedFrameRow, actualFrameRow)
+		}
+
+		headerOffset := 0
+		if table.hasHeader {
+			headerOffset += 1
+
+			expectedFrameRow = table.destinationRow + table.moveRows
+			actualFrameRow = frame.header.row
+			if expectedFrameRow != actualFrameRow {
+				t.Errorf("LogicalFrame.move(): expected header to be at %d, but is at %d", expectedFrameRow, actualFrameRow)
+			}
+		}
+
+		if table.hasFooter {
+			expectedFrameRow = table.destinationRow + table.startRows + headerOffset + table.moveRows
+			actualFrameRow = frame.footer.row
+			if expectedFrameRow != actualFrameRow {
+				t.Errorf("LogicalFrame.move(): expected footer to be at %d, but is at %d", expectedFrameRow, actualFrameRow)
+			}
+		}
+
+		for idx, line := range frame.activeLines {
+			expectedFrameRow = table.destinationRow + idx + headerOffset + table.moveRows
+			actualFrameRow = line.row
+			if expectedFrameRow != actualFrameRow {
+				t.Errorf("LogicalFrame.move(): expected line to be at %d, but is at %d", expectedFrameRow, actualFrameRow)
+			}
+		}
+	}
+}
+
+func Test_LogicalFrame_Update(t *testing.T) {
+	terminalHeight = 100
+	frameRows := 10
+
+	tables := []struct {
+		destinationRow int
+		adjustedRow int
+	}{
+		{-20, 1},
+		{-2, 1},
+		{0, 1},
+		{1, 1},
+		{50, 50},
+		{89, 89},
+		{90, 90},
+		{91, 91},
+		{99, 91},
+		{100, 91},
+		{110, 91},
+
+	}
+
+	for _, table := range tables {
+		frame := newLogicalFrameAt(frameRows, false, false, table.destinationRow)
+		frame.update()
+		actualResult := frame.frameStartIdx
+		if table.adjustedRow != actualResult {
+			t.Errorf("LogicalFrame.update(): expected update row of %d, but is at row %d", table.adjustedRow, actualResult)
+		}
+	}
+
+}

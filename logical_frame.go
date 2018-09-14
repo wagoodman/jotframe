@@ -167,7 +167,7 @@ func (frame *logicalFrame) remove(line *Line) error {
 	frame.activeLines = append(frame.activeLines[:matchedIdx], frame.activeLines[matchedIdx+1:]...)
 
 	// move each line index ahead of the deleted element
-	for idx := matchedIdx+1; idx < len(frame.activeLines); idx++ {
+	for idx := matchedIdx; idx < len(frame.activeLines); idx++ {
 		frame.activeLines[idx].move(-1)
 	}
 
@@ -259,7 +259,7 @@ func (frame *logicalFrame) update() error {
 		return frame.move(offset)
 	}
 
-	// if the frame has moved past the bottom of the screen, move it down a bit
+	// if the frame has moved above the top of the screen, move it down a bit
 	if futureFrameStartIdx < 1 {
 		offset := 1 - futureFrameStartIdx
 		return frame.move(offset)
@@ -275,7 +275,7 @@ func (frame *logicalFrame) updateAndDraw() {
 	}
 
 	// don't allow any update function to draw outside of the screen dimensions
-	// frame.update()
+	frame.update()
 
 	frame.draw()
 }
