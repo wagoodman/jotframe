@@ -5,8 +5,8 @@ import (
 	"os"
 	"fmt"
 	"strings"
-	"github.com/satori/go.uuid"
 	"io"
+	"github.com/satori/go.uuid"
 )
 
 func NewLine(row int) *Line {
@@ -31,7 +31,7 @@ func (line *Line) IsClosed() bool {
 }
 
 func (line Line) String() string {
-	return fmt.Sprintf("<Line id:%s idx:%d closed:%v buffer:%d>", line.id, line.row, line.closed, len(line.buffer))
+	return fmt.Sprintf("<Line row:%d closed:%v bufferLen:%d>", line.row, line.closed, len(line.buffer))
 }
 
 func (line *Line) move(rows int) error {
