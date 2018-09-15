@@ -32,7 +32,6 @@ func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, destinationRow int) 
 }
 
 func (frame *logicalFrame) appendTrail(str string) {
-	// fmt.Printf("\n\n\n\n\n\n\n\nAPPEND %s\n\n", str)
 	frame.trailRows = append(frame.trailRows, str)
 }
 
