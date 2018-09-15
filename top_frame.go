@@ -63,6 +63,8 @@ func (frame *TopFrame) Remove(line *Line) error {
 func (frame *TopFrame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
+	// closing the frame moves the cursor, which implies a update/draw cycle
+	defer frame.frame.updateAndDraw()
 
 	return frame.frame.close()
 }
@@ -96,4 +98,8 @@ func (frame *TopFrame) update() error {
 		return frame.frame.move(offset)
 	}
 	return nil
+}
+
+func (frame *TopFrame) Wait() {
+	frame.frame.wait()
 }

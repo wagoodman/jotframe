@@ -66,13 +66,16 @@ func (frame *FixedFrame) Append() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	if frame.frame.isAtOrPastScreenBottom() {
-		// make more screen realestate
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+	line, err := frame.frame.append()
+	if err == nil {
+		if frame.frame.isAtOrPastScreenBottom() {
+			// make more screen realestate
+			frame.frame.move(-1)
+			frame.frame.rowAdvancements += 1
+		}
 	}
 
-	return frame.frame.append()
+	return line, err
 }
 
 func (frame *FixedFrame) Prepend() (*Line, error) {
@@ -80,13 +83,16 @@ func (frame *FixedFrame) Prepend() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	if frame.frame.isAtOrPastScreenBottom() {
-		// make more screen realestate
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+	line, err := frame.frame.prepend()
+	if err == nil {
+		if frame.frame.isAtOrPastScreenBottom() {
+			// make more screen realestate
+			frame.frame.move(-1)
+			frame.frame.rowAdvancements += 1
+		}
 	}
 
-	return frame.frame.prepend()
+	return line, err
 }
 
 func (frame *FixedFrame) Insert(index int) (*Line, error) {
@@ -94,13 +100,16 @@ func (frame *FixedFrame) Insert(index int) (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	if frame.frame.isAtOrPastScreenBottom() {
-		// make more screen realestate
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+	line, err := frame.frame.insert(index)
+	if err == nil {
+		if frame.frame.isAtOrPastScreenBottom() {
+			// make more screen realestate
+			frame.frame.move(-1)
+			frame.frame.rowAdvancements += 1
+		}
 	}
 
-	return frame.frame.insert(index)
+	return line, err
 }
 
 func (frame *FixedFrame) Remove(line *Line) error {
@@ -108,13 +117,15 @@ func (frame *FixedFrame) Remove(line *Line) error {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	if frame.trailOnRemove {
+	err := frame.frame.remove(line)
+
+	if err == nil && frame.trailOnRemove {
 		// write the removed line to the trail log + move the frame down
 		frame.frame.appendTrail(string(line.buffer))
 		frame.frame.move(1)
 	}
 
-	return frame.frame.remove(line)
+	return err
 }
 
 func (frame *FixedFrame) Move(rows int) error {
@@ -128,6 +139,8 @@ func (frame *FixedFrame) Move(rows int) error {
 func (frame *FixedFrame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
+	// closing the frame moves the cursor, which implies a update/draw cycle
+	defer frame.frame.updateAndDraw()
 
 	return frame.frame.close()
 }
@@ -150,4 +163,8 @@ func (frame *FixedFrame) ClearAndClose() error {
 		return err
 	}
 	return frame.frame.close()
+}
+
+func (frame *FixedFrame) Wait() {
+	frame.frame.wait()
 }

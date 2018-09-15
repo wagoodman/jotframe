@@ -2,11 +2,12 @@ package jotframe
 
 import (
 	"testing"
+	"sync"
 )
 
 func Test_NewLine(t *testing.T) {
 
-	line := NewLine(22)
+	line := NewLine(22, &sync.WaitGroup{})
 
 	expectedRow := 22
 	actualRow := line.row
@@ -26,7 +27,7 @@ func Test_Line_String(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		line := NewLine(table.row)
+		line := NewLine(table.row, &sync.WaitGroup{})
 		line.buffer = []byte(table.message)
 
 		expectedResult := table.expectedStr
@@ -49,7 +50,7 @@ func Test_Line_move(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		line := NewLine(table.row)
+		line := NewLine(table.row, &sync.WaitGroup{})
 		line.move(table.moveRows)
 
 		expectedResult := table.row + table.moveRows

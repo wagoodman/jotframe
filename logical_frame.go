@@ -2,22 +2,27 @@ package jotframe
 
 import (
 	"fmt"
+	"sync"
 )
 
 func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, destinationRow int) *logicalFrame {
 	frame := &logicalFrame{}
 	frame.frameStartIdx = destinationRow
+	frame.closeSignal = &sync.WaitGroup{}
+	frame.closeSignal.Add(1)
 
 	var relativeRow int
 	if hasHeader {
-		frame.header = NewLine(frame.frameStartIdx + relativeRow)
+		// todo: should headers have closeSignal waitGroups? or should they be nil?
+		frame.header = NewLine(frame.frameStartIdx + relativeRow, frame.closeSignal)
 		relativeRow++
 	}
 	for idx := 0; idx < rows; idx++ {
 		frame.append()
 	}
 	if hasFooter {
-		frame.footer = NewLine(frame.frameStartIdx + len(frame.activeLines) + relativeRow)
+		// todo: should footers have closeSignal waitGroups? or should they be nil?
+		frame.footer = NewLine(frame.frameStartIdx + len(frame.activeLines) + relativeRow, frame.closeSignal)
 		relativeRow++
 	}
 
@@ -27,6 +32,7 @@ func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, destinationRow int) 
 }
 
 func (frame *logicalFrame) appendTrail(str string) {
+	// fmt.Printf("\n\n\n\n\n\n\n\nAPPEND %s\n\n", str)
 	frame.trailRows = append(frame.trailRows, str)
 }
 
@@ -55,7 +61,7 @@ func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
 }
 
 func (frame *logicalFrame) append() (*Line, error) {
-	if frame.closed {
+	if frame.isClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
@@ -70,7 +76,7 @@ func (frame *logicalFrame) append() (*Line, error) {
 
 	}
 
-	newLine := NewLine(rowIdx)
+	newLine := NewLine(rowIdx, frame.closeSignal)
 	frame.activeLines = append(frame.activeLines, newLine)
 
 	if frame.footer != nil {
@@ -81,7 +87,7 @@ func (frame *logicalFrame) append() (*Line, error) {
 }
 
 func (frame *logicalFrame) prepend() (*Line, error) {
-	if frame.closed {
+	if frame.isClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
@@ -90,7 +96,8 @@ func (frame *logicalFrame) prepend() (*Line, error) {
 		rowIdx += 1
 	}
 
-	newLine := NewLine(rowIdx)
+	newLine := NewLine(rowIdx, frame.closeSignal)
+
 	for _, line := range frame.activeLines {
 		line.move(1)
 	}
@@ -104,7 +111,7 @@ func (frame *logicalFrame) prepend() (*Line, error) {
 }
 
 func (frame *logicalFrame) insert(index int) (*Line, error) {
-	if frame.closed {
+	if frame.isClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
@@ -117,7 +124,7 @@ func (frame *logicalFrame) insert(index int) (*Line, error) {
 		rowIdx += 1
 	}
 
-	newLine := NewLine(rowIdx)
+	newLine := NewLine(rowIdx, frame.closeSignal)
 
 	frame.activeLines = append(frame.activeLines, nil)
 	copy(frame.activeLines[index+1:], frame.activeLines[index:])
@@ -135,19 +142,25 @@ func (frame *logicalFrame) insert(index int) (*Line, error) {
 	return newLine, nil
 }
 
-func (frame *logicalFrame) remove(line *Line) error {
-	if frame.closed {
-		return fmt.Errorf("frame is closed")
-	}
-
+func (frame *logicalFrame) indexOf(line *Line) int {
 	// find the index of the line object
 	matchedIdx := -1
 	for idx, item := range frame.activeLines {
 		if item == line {
-			matchedIdx = idx
-			break
+			return idx
 		}
 	}
+
+	return matchedIdx
+}
+
+func (frame *logicalFrame) remove(line *Line) error {
+	if frame.isClosed() {
+		return fmt.Errorf("frame is closed")
+	}
+
+	// find the index of the line object
+	matchedIdx := frame.indexOf(line)
 
 	if matchedIdx < 0 {
 		return fmt.Errorf("could not find line in frame")
@@ -196,6 +209,15 @@ func (frame *logicalFrame) clear() error {
 
 func (frame *logicalFrame) close() error {
 
+	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
+	if frame.isAtOrPastScreenBottom() {
+		height := frame.height()
+		offset := frame.frameStartIdx - ((terminalHeight - height)+1)
+		offset += 1 // we want to move one line past the frame
+		frame.move(-offset)
+		frame.rowAdvancements += offset
+	}
+
 	if frame.header != nil {
 		err := frame.header.close()
 		if err != nil {
@@ -216,8 +238,36 @@ func (frame *logicalFrame) close() error {
 			return err
 		}
 	}
+
 	frame.closed = true
+	frame.closeSignal.Done()
+
 	return nil
+}
+
+
+// todo: I think this should be decided by the user via a close() aciton, not by the indication of closed lines
+// since you can always add another line... you don't know when an empty frame should remain open or not
+func (frame *logicalFrame) isClosed() bool {
+	// if frame.header != nil {
+	// 	if !frame.header.closed {
+	// 		return false
+	// 	}
+	// }
+	//
+	// for _, line := range frame.activeLines {
+	// 	if !line.closed {
+	// 		return false
+	// 	}
+	// }
+	//
+	// if frame.footer != nil {
+	// 	if !frame.footer.closed {
+	// 		return false
+	// 	}
+	// }
+	// return true
+	return frame.closed
 }
 
 
@@ -339,5 +389,14 @@ func (frame *logicalFrame) draw() error {
 		}
 	}
 
+	if frame.isClosed() {
+		setCursorRow(frame.frameStartIdx + frame.height())
+	}
+
 	return nil
+}
+
+func (frame *logicalFrame) wait() {
+	frame.closeSignal.Wait()
+	setCursorRow(frame.frameStartIdx + frame.height())
 }

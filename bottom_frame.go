@@ -69,12 +69,15 @@ func (frame *BottomFrame) Append() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	// appended rows should appear to move upwards on the screen, which means that we should
-	// move the entire frame upwards 1 line while making more screen space by 1 line
-	frame.frame.move(-1)
-	frame.frame.rowAdvancements += 1
+	line, err := frame.frame.append()
+	if err == nil {
+		// appended rows should appear to move upwards on the screen, which means that we should
+		// move the entire frame upwards 1 line while making more screen space by 1 line
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
 
-	return frame.frame.append()
+	return line, err
 }
 
 func (frame *BottomFrame) Prepend() (*Line, error) {
@@ -82,12 +85,15 @@ func (frame *BottomFrame) Prepend() (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	// appended rows should appear to move upwards on the screen, which means that we should
-	// move the entire frame upwards 1 line while making more screen space by 1 line
-	frame.frame.move(-1)
-	frame.frame.rowAdvancements += 1
+	line, err := frame.frame.prepend()
+	if err == nil {
+		// appended rows should appear to move upwards on the screen, which means that we should
+		// move the entire frame upwards 1 line while making more screen space by 1 line
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
 
-	return frame.frame.prepend()
+	return line, err
 }
 
 func (frame *BottomFrame) Insert(index int) (*Line, error) {
@@ -95,12 +101,15 @@ func (frame *BottomFrame) Insert(index int) (*Line, error) {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	// appended rows should appear to move upwards on the screen, which means that we should
-	// move the entire frame upwards 1 line while making more screen space by 1 line
-	frame.frame.move(-1)
-	frame.frame.rowAdvancements += 1
+	line, err := frame.frame.insert(index)
+	if err == nil {
+		// appended rows should appear to move upwards on the screen, which means that we should
+		// move the entire frame upwards 1 line while making more screen space by 1 line
+		frame.frame.move(-1)
+		frame.frame.rowAdvancements += 1
+	}
 
-	return frame.frame.insert(index)
+	return line, err
 }
 
 func (frame *BottomFrame) Remove(line *Line) error {
@@ -108,18 +117,23 @@ func (frame *BottomFrame) Remove(line *Line) error {
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
 
-	if frame.trailOnRemove {
-		// write the removed line to the trail log + move the frame down
-		frame.frame.appendTrail(string(line.buffer))
+	err := frame.frame.remove(line)
+	if err == nil {
+		if frame.trailOnRemove {
+			// write the removed line to the trail log + move the frame down
+			frame.frame.appendTrail(string(line.buffer))
+		}
+		frame.frame.move(1)
 	}
-	frame.frame.move(1)
 
-	return frame.frame.remove(line)
+	return err
 }
 
 func (frame *BottomFrame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
+	// closing the frame moves the cursor, which implies a update/draw cycle
+	defer frame.frame.updateAndDraw()
 
 	return frame.frame.close()
 }
@@ -154,4 +168,8 @@ func (frame *BottomFrame) update() error {
 		frame.frame.rowAdvancements += frame.frame.frameStartIdx - targetFrameStartIndex
 	}
 	return nil
+}
+
+func (frame *BottomFrame) Wait() {
+	frame.frame.wait()
 }

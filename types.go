@@ -10,6 +10,7 @@ type Line struct {
 	buffer     []byte
 	row        int
 	lock       *sync.Mutex
+	closeSignal  *sync.WaitGroup
 	closed     bool
 	stale      bool
 }
@@ -23,6 +24,7 @@ type logicalFrame struct  {
 	footer          *Line
 
 	frameStartIdx int
+	closeSignal  *sync.WaitGroup
 	updateFn      func() error
 	closed        bool
 	stale         bool

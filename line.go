@@ -7,15 +7,20 @@ import (
 	"strings"
 	"io"
 	"github.com/satori/go.uuid"
+	"sync"
 )
 
-func NewLine(row int) *Line {
-	line := &Line{}
-	line.id = uuid.Must(uuid.NewV4())
-	line.row = row
-	line.lock = getScreenLock()
-	line.stale = true
-	return line
+func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
+	if closeSignal != nil {
+		closeSignal.Add(1)
+	}
+	return &Line{
+		id: uuid.Must(uuid.NewV4()),
+		row: row,
+		lock: getScreenLock(),
+		stale: true,
+		closeSignal: closeSignal,
+	}
 }
 
 func (line *Line) Id() uuid.UUID {
@@ -136,6 +141,12 @@ func (line *Line) Close() error {
 }
 
 func (line *Line) close() error {
-	line.closed = true
+	if !line.closed {
+		line.closed = true
+		if line.closeSignal != nil {
+			line.closeSignal.Done()
+		}
+	}
+
 	return nil
 }

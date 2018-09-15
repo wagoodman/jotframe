@@ -27,7 +27,7 @@ func Refresh() error {
 
 func refresh() error {
 	for _, frame := range allFrames {
-		if !frame.closed {
+		if !frame.isClosed() {
 			frame.clear()
 			frame.updateAndDraw()
 		}
