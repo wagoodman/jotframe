@@ -65,7 +65,7 @@ func (item Resource) download(line *jotframe.Line) {
 
 	}
 	// write a final message
-	message = fmt.Sprintf("Download %s", item.name)
+	message = fmt.Sprintf("Downloaded %s", item.name)
 	io.WriteString(line, message)
 }
 
@@ -94,16 +94,6 @@ func main() {
 		{"counter-strike", 4202, 0},
 	}
 	totalItems := len(downloads)
-
-
-
-	/*
-	Maybe a frame should have a listener? so you can subscribe to events and act on them (for header and footer updates)
-
-	Allow for a built in worker pool... but its really a frame representing a partial queue?
-	 */
-
-
 
 	frame := jotframe.NewFixedFrame(0, false, true, true)
 
