@@ -2,20 +2,21 @@ package jotframe
 
 import (
 	"sync"
+
 	"github.com/satori/go.uuid"
 )
 
 type Line struct {
-	id         uuid.UUID
-	buffer     []byte
-	row        int
-	lock       *sync.Mutex
-	closeSignal  *sync.WaitGroup
-	closed     bool
-	stale      bool
+	id          uuid.UUID
+	buffer      []byte
+	row         int
+	lock        *sync.Mutex
+	closeSignal *sync.WaitGroup
+	closed      bool
+	stale       bool
 }
 
-type logicalFrame struct  {
+type logicalFrame struct {
 	header          *Line
 	activeLines     []*Line
 	clearRows       []int
@@ -24,15 +25,15 @@ type logicalFrame struct  {
 	footer          *Line
 
 	frameStartIdx int
-	closeSignal  *sync.WaitGroup
+	closeSignal   *sync.WaitGroup
 	updateFn      func() error
 	closed        bool
 	stale         bool
 }
 
 type TopFrame struct {
-	frame  *logicalFrame
-	lock   *sync.Mutex
+	frame *logicalFrame
+	lock  *sync.Mutex
 }
 
 type BottomFrame struct {
