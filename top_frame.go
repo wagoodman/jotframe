@@ -1,5 +1,7 @@
 package jotframe
 
+import "fmt"
+
 func NewTopFrame(rows int, hasHeader, hasFooter bool) *TopFrame {
 	logicalFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, 0)
 	frame := &TopFrame{
@@ -13,6 +15,9 @@ func NewTopFrame(rows int, hasHeader, hasFooter bool) *TopFrame {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	defer frame.frame.updateAndDraw()
+
+	// Clear screen and set cursor back to top of window
+	fmt.Print("\033[2J")
 
 	return frame
 }
