@@ -32,18 +32,18 @@ type logicalFrame struct {
 }
 
 type TopFrame struct {
-	frame *logicalFrame
-	lock  *sync.Mutex
+	logicalFrame *logicalFrame
+	lock         *sync.Mutex
 }
 
 type BottomFrame struct {
-	frame         *logicalFrame
+	logicalFrame  *logicalFrame
 	lock          *sync.Mutex
 	trailOnRemove bool
 }
 
 type FixedFrame struct {
-	frame         *logicalFrame
+	logicalFrame  *logicalFrame
 	lock          *sync.Mutex
 	trailOnRemove bool
 }

@@ -14,19 +14,19 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bo
 
 	innerFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, frameTopRow)
 	frame := &BottomFrame{
-		frame: innerFrame,
-		lock: getScreenLock(),
+		logicalFrame:  innerFrame,
+		lock:          getScreenLock(),
 		trailOnRemove: includeTrailOnRemove,
 	}
-	frame.frame.updateFn = frame.update
+	frame.logicalFrame.updateFn = frame.update
 
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
 	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
 	// one assumption is made: the current cursor position is where history (may) start.
-	frameHeight := frame.frame.height()
+	frameHeight := frame.logicalFrame.height()
 	currentRow, err := GetCursorRow()
 	if err != nil {
 		panic(err)
@@ -35,46 +35,46 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bo
 	// if we start drawing now, we'll be past the bottom of the screen, preserve the current terminal history
 	if currentRow + frameHeight > terminalHeight {
 		offset := currentRow - ((terminalHeight - height)+1)
-		frame.frame.rowAdvancements += offset
+		frame.logicalFrame.rowAdvancements += offset
 	}
 
 	return frame
 }
 
 func (frame *BottomFrame) Header() *Line {
-	return frame.frame.header
+	return frame.logicalFrame.header
 }
 
 func (frame *BottomFrame) Footer() *Line {
-	return frame.frame.footer
+	return frame.logicalFrame.footer
 }
 
 func (frame *BottomFrame) Lines() []*Line {
-	return frame.frame.activeLines
+	return frame.logicalFrame.activeLines
 }
 
 func (frame *BottomFrame) AppendTrail(str string) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
 	// write the removed line to the trail log + move the frame down (while advancing the frame)
-	frame.frame.appendTrail(str)
+	frame.logicalFrame.appendTrail(str)
 	// frame.frame.move(1)
-	frame.frame.rowAdvancements += 1
+	frame.logicalFrame.rowAdvancements += 1
 }
 
 func (frame *BottomFrame) Append() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.append()
+	line, err := frame.logicalFrame.append()
 	if err == nil {
 		// appended rows should appear to move upwards on the screen, which means that we should
 		// move the entire frame upwards 1 line while making more screen space by 1 line
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+		frame.logicalFrame.move(-1)
+		frame.logicalFrame.rowAdvancements += 1
 	}
 
 	return line, err
@@ -83,14 +83,14 @@ func (frame *BottomFrame) Append() (*Line, error) {
 func (frame *BottomFrame) Prepend() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.prepend()
+	line, err := frame.logicalFrame.prepend()
 	if err == nil {
 		// appended rows should appear to move upwards on the screen, which means that we should
 		// move the entire frame upwards 1 line while making more screen space by 1 line
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+		frame.logicalFrame.move(-1)
+		frame.logicalFrame.rowAdvancements += 1
 	}
 
 	return line, err
@@ -99,14 +99,14 @@ func (frame *BottomFrame) Prepend() (*Line, error) {
 func (frame *BottomFrame) Insert(index int) (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.insert(index)
+	line, err := frame.logicalFrame.insert(index)
 	if err == nil {
 		// appended rows should appear to move upwards on the screen, which means that we should
 		// move the entire frame upwards 1 line while making more screen space by 1 line
-		frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+		frame.logicalFrame.move(-1)
+		frame.logicalFrame.rowAdvancements += 1
 	}
 
 	return line, err
@@ -115,15 +115,15 @@ func (frame *BottomFrame) Insert(index int) (*Line, error) {
 func (frame *BottomFrame) Remove(line *Line) error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	err := frame.frame.remove(line)
+	err := frame.logicalFrame.remove(line)
 	if err == nil {
 		if frame.trailOnRemove {
 			// write the removed line to the trail log + move the frame down
-			frame.frame.appendTrail(string(line.buffer))
+			frame.logicalFrame.appendTrail(string(line.buffer))
 		}
-		frame.frame.move(1)
+		frame.logicalFrame.move(1)
 	}
 
 	return err
@@ -133,43 +133,43 @@ func (frame *BottomFrame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	// closing the frame moves the cursor, which implies a update/draw cycle
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.frame.close()
+	return frame.logicalFrame.close()
 }
 
 func (frame *BottomFrame) Clear() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.frame.clear()
+	return frame.logicalFrame.clear()
 }
 
 func (frame *BottomFrame) ClearAndClose() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	err := frame.frame.clear()
+	err := frame.logicalFrame.clear()
 	if err != nil {
 		return err
 	}
-	return frame.frame.close()
+	return frame.logicalFrame.close()
 }
 
 // update any positions based on external data and redraw
 func (frame *BottomFrame) update() error {
-	height := frame.frame.height()
+	height := frame.logicalFrame.height()
 	targetFrameStartIndex := (terminalHeight - height)+1
-	if frame.frame.frameStartIdx != targetFrameStartIndex {
+	if frame.logicalFrame.frameStartIdx != targetFrameStartIndex {
 		// reset the frame and all activeLines to the correct offset. This must be done with new
 		// lines since we should not overwrite the trail rows above the frame.
-		frame.frame.rowAdvancements += frame.frame.frameStartIdx - targetFrameStartIndex
+		frame.logicalFrame.rowAdvancements += frame.logicalFrame.frameStartIdx - targetFrameStartIndex
 	}
 	return nil
 }
 
 func (frame *BottomFrame) Wait() {
-	frame.frame.wait()
+	frame.logicalFrame.wait()
 }

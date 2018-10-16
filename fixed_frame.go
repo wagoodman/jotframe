@@ -13,65 +13,65 @@ func NewFixedFrame(rows int, hasHeader, hasFooter, includeTrailOnRemove bool) *F
 func NewFixedFrameAt(rows int, hasHeader, hasFooter, includeTrailOnRemove bool, destinationRow int) *FixedFrame {
 	innerFrame := newLogicalFrameAt(rows, hasHeader, hasFooter, destinationRow)
 	frame := &FixedFrame{
-		frame: innerFrame,
-		lock: getScreenLock(),
+		logicalFrame:  innerFrame,
+		lock:          getScreenLock(),
 		trailOnRemove: includeTrailOnRemove,
 	}
-	frame.frame.updateFn = nil
+	frame.logicalFrame.updateFn = nil
 
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
 	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
-	if frame.frame.isAtOrPastScreenBottom() {
-		height := frame.frame.height()
-		offset := frame.frame.frameStartIdx - ((terminalHeight - height)+1)
-		frame.frame.move(-offset)
-		frame.frame.rowAdvancements += offset
+	if frame.logicalFrame.isAtOrPastScreenBottom() {
+		height := frame.logicalFrame.height()
+		offset := frame.logicalFrame.frameStartIdx - ((terminalHeight - height)+1)
+		frame.logicalFrame.move(-offset)
+		frame.logicalFrame.rowAdvancements += offset
 	}
 
 	return frame
 }
 
 func (frame *FixedFrame) Header() *Line {
-	return frame.frame.header
+	return frame.logicalFrame.header
 }
 
 func (frame *FixedFrame) Footer() *Line {
-	return frame.frame.footer
+	return frame.logicalFrame.footer
 }
 
 func (frame *FixedFrame) Lines() []*Line {
-	return frame.frame.activeLines
+	return frame.logicalFrame.activeLines
 }
 
 func (frame *FixedFrame) AppendTrail(str string) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
 	// write the removed line to the trail log + move the frame down (while advancing the frame)
-	frame.frame.appendTrail(str)
-	if frame.frame.isAtOrPastScreenBottom() {
+	frame.logicalFrame.appendTrail(str)
+	if frame.logicalFrame.isAtOrPastScreenBottom() {
 		// frame.frame.move(-1)
-		frame.frame.rowAdvancements += 1
+		frame.logicalFrame.rowAdvancements += 1
 	} else {
-		frame.frame.move(1)
+		frame.logicalFrame.move(1)
 	}
 }
 
 func (frame *FixedFrame) Append() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.append()
+	line, err := frame.logicalFrame.append()
 	if err == nil {
-		if frame.frame.isAtOrPastScreenBottom() {
+		if frame.logicalFrame.isAtOrPastScreenBottom() {
 			// make more screen realestate
-			frame.frame.move(-1)
-			frame.frame.rowAdvancements += 1
+			frame.logicalFrame.move(-1)
+			frame.logicalFrame.rowAdvancements += 1
 		}
 	}
 
@@ -81,14 +81,14 @@ func (frame *FixedFrame) Append() (*Line, error) {
 func (frame *FixedFrame) Prepend() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.prepend()
+	line, err := frame.logicalFrame.prepend()
 	if err == nil {
-		if frame.frame.isAtOrPastScreenBottom() {
+		if frame.logicalFrame.isAtOrPastScreenBottom() {
 			// make more screen realestate
-			frame.frame.move(-1)
-			frame.frame.rowAdvancements += 1
+			frame.logicalFrame.move(-1)
+			frame.logicalFrame.rowAdvancements += 1
 		}
 	}
 
@@ -98,14 +98,14 @@ func (frame *FixedFrame) Prepend() (*Line, error) {
 func (frame *FixedFrame) Insert(index int) (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	line, err := frame.frame.insert(index)
+	line, err := frame.logicalFrame.insert(index)
 	if err == nil {
-		if frame.frame.isAtOrPastScreenBottom() {
+		if frame.logicalFrame.isAtOrPastScreenBottom() {
 			// make more screen realestate
-			frame.frame.move(-1)
-			frame.frame.rowAdvancements += 1
+			frame.logicalFrame.move(-1)
+			frame.logicalFrame.rowAdvancements += 1
 		}
 	}
 
@@ -115,14 +115,14 @@ func (frame *FixedFrame) Insert(index int) (*Line, error) {
 func (frame *FixedFrame) Remove(line *Line) error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	err := frame.frame.remove(line)
+	err := frame.logicalFrame.remove(line)
 
 	if err == nil && frame.trailOnRemove {
 		// write the removed line to the trail log + move the frame down
-		frame.frame.appendTrail(string(line.buffer))
-		frame.frame.move(1)
+		frame.logicalFrame.appendTrail(string(line.buffer))
+		frame.logicalFrame.move(1)
 	}
 
 	return err
@@ -131,40 +131,40 @@ func (frame *FixedFrame) Remove(line *Line) error {
 func (frame *FixedFrame) Move(rows int) error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.frame.move(rows)
+	return frame.logicalFrame.move(rows)
 }
 
 func (frame *FixedFrame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 	// closing the frame moves the cursor, which implies a update/draw cycle
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.frame.close()
+	return frame.logicalFrame.close()
 }
 
 func (frame *FixedFrame) Clear() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.frame.clear()
+	return frame.logicalFrame.clear()
 }
 
 func (frame *FixedFrame) ClearAndClose() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	defer frame.frame.updateAndDraw()
+	defer frame.logicalFrame.updateAndDraw()
 
-	err := frame.frame.clear()
+	err := frame.logicalFrame.clear()
 	if err != nil {
 		return err
 	}
-	return frame.frame.close()
+	return frame.logicalFrame.close()
 }
 
 func (frame *FixedFrame) Wait() {
-	frame.frame.wait()
+	frame.logicalFrame.wait()
 }
