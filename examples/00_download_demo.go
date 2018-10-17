@@ -1,22 +1,31 @@
 package main
 
 import (
-	"github.com/wagoodman/jotframe"
-	"time"
-	"math/rand"
+	"bytes"
 	"fmt"
 	"io"
-	"bytes"
+	"math/rand"
 	"strings"
+	"time"
+
 	"github.com/k0kubun/go-ansi"
-	"golang.org/x/sync/semaphore"
+	"github.com/wagoodman/jotframe"
 	"golang.org/x/net/context"
+	"golang.org/x/sync/semaphore"
 )
+
+// TODO: The worker wrapper object should take the following:
+// 1. A slice of objects that implements a Worker interface.
+//      these objects will do the actual work to be done...
+// 2. An (optional) header function that satisfies a Worker interface.
+// 3. An (optional) footer function that satisfies a Worker interface.
+// 4. A number of maximum items to work on concurrently.
 
 type Resource struct {
 	name           string
 	totalSize      int
 	downloadedSize int
+	// TODO: this should take a pointer to a channel (for the footer)
 }
 
 func (item Resource) String() string {
@@ -40,12 +49,19 @@ func (item Resource) String() string {
 	spaces := strings.Repeat(" ", numSpaces)
 	bars := strings.Repeat("=", numBars)
 
-	buffer.WriteString(fmt.Sprintf("Downloading %-20s [%s%s] %3.2f%% (%d/%d)", item.name+"...",bars,spaces,percent*100, item.downloadedSize, item.totalSize))
+	buffer.WriteString(fmt.Sprintf("Downloading %-20s [%s%s] %3.2f%% (%d/%d)", item.name+"...", bars, spaces, percent*100, item.downloadedSize, item.totalSize))
 
 	return buffer.String()
 }
 
-func (item Resource) download(line *jotframe.Line) {
+// TODO: use this to actually update the footer
+func footerProcessor(line *jotframe.Line) {
+
+	// This function reads from a channel... items come in when worker tasks have been completed
+	// We then update the footer
+}
+
+func (item Resource) Work(line *jotframe.Line) {
 	minMs := 10
 	maxMs := 100
 
@@ -53,7 +69,7 @@ func (item Resource) download(line *jotframe.Line) {
 	io.WriteString(line, message)
 	for {
 		// sleep for a bit...
-		randomInterval := rand.Intn(maxMs - minMs) + minMs
+		randomInterval := rand.Intn(maxMs-minMs) + minMs
 		time.Sleep(time.Duration(randomInterval) * time.Millisecond)
 		item.downloadedSize += randomInterval
 
@@ -67,8 +83,9 @@ func (item Resource) download(line *jotframe.Line) {
 	// write a final message
 	message = fmt.Sprintf("Downloaded %s", item.name)
 	io.WriteString(line, message)
-}
 
+	// TODO: when this task completes, we should write out to the footer channel
+}
 
 func main() {
 	const maxConcurrent = 4
@@ -114,6 +131,7 @@ func main() {
 			completedItems++
 			frame.Remove(line)
 
+			// TODO: we should not write to the footer here (anywhere in this function)
 			if completedItems == totalItems {
 				frame.Footer().WriteString("All Downloads Complete!")
 				frame.Footer().Close()
@@ -125,11 +143,10 @@ func main() {
 				frame.Close()
 			}
 
-		}(item.download, line)
+		}(item.Work, line)
 	}
 
 	frame.Wait()
 
 	ansi.CursorShow()
 }
-
