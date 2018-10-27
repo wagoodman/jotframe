@@ -3,7 +3,7 @@ package jotframe
 import (
 	"sync"
 
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 type Line struct {

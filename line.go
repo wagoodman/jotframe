@@ -1,13 +1,14 @@
 package jotframe
 
 import (
-	"github.com/k0kubun/go-ansi"
-	"os"
 	"fmt"
-	"strings"
 	"io"
-	"github.com/satori/go.uuid"
+	"os"
+	"strings"
 	"sync"
+
+	"github.com/google/uuid"
+	"github.com/k0kubun/go-ansi"
 )
 
 func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
@@ -15,10 +16,10 @@ func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
 		closeSignal.Add(1)
 	}
 	return &Line{
-		id: uuid.Must(uuid.NewV4()),
-		row: row,
-		lock: getScreenLock(),
-		stale: true,
+		id:          uuid.New(),
+		row:         row,
+		lock:        getScreenLock(),
+		stale:       true,
 		closeSignal: closeSignal,
 	}
 }
@@ -131,7 +132,6 @@ func (line *Line) ClearAndClose() error {
 	defer line.close()
 	return line.clear(false)
 }
-
 
 func (line *Line) Close() error {
 	line.lock.Lock()
