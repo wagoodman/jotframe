@@ -10,8 +10,6 @@ import (
 
 	"github.com/k0kubun/go-ansi"
 	"github.com/wagoodman/jotframe"
-	"golang.org/x/net/context"
-	"golang.org/x/sync/semaphore"
 )
 
 // TODO: The worker wrapper object should take the following:
@@ -92,7 +90,7 @@ func main() {
 	ansi.CursorHide()
 	rand.Seed(time.Now().Unix())
 
-	downloads := []*Resource{
+	downloads := []Resource{
 		{"fedora", 18691, 0},
 		{"consul", 1580, 0},
 		{"bashful", 1720, 0},
@@ -110,43 +108,6 @@ func main() {
 		{"firefox", 4373, 0},
 		{"counter-strike", 4202, 0},
 	}
-	totalItems := len(downloads)
+	jotframe.WorkQueue(maxConcurrent, downloads)
 
-	frame := jotframe.NewFixedFrame(0, false, true, true)
-
-	frame.Footer().WriteString(fmt.Sprintf("Completed Downloads: [0/%d]", totalItems))
-
-	// worker pool
-	ctx := context.TODO()
-	sem := semaphore.NewWeighted(maxConcurrent)
-
-	completedItems := 0
-	for _, item := range downloads {
-		sem.Acquire(ctx, 1)
-		line, _ := frame.Append()
-		go func(fun func(line *jotframe.Line), line *jotframe.Line) {
-			defer sem.Release(1)
-
-			fun(line)
-			completedItems++
-			frame.Remove(line)
-
-			// TODO: we should not write to the footer here (anywhere in this function)
-			if completedItems == totalItems {
-				frame.Footer().WriteString("All Downloads Complete!")
-				frame.Footer().Close()
-			} else {
-				frame.Footer().WriteString(fmt.Sprintf("Downloads: [%d/%d]", completedItems, totalItems))
-			}
-
-			if len(frame.Lines()) == 0 {
-				frame.Close()
-			}
-
-		}(item.Work, line)
-	}
-
-	frame.Wait()
-
-	ansi.CursorShow()
 }
