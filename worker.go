@@ -12,13 +12,28 @@ type Worker interface {
 	Work(*Line)
 }
 
-func WorkQueue(maxConcurrent int64, workerArray []interface{}) {
+type WorkQueue struct {
+	maxConcurrent int64
+	queue         []interface{}
+}
+
+func NewWorkQueue(maxConcurrent int64) *WorkQueue {
+	return &WorkQueue{
+		maxConcurrent: maxConcurrent,
+	}
+}
+
+func (wq *WorkQueue) AddWork(work interface{}) {
+	wq.queue = append(wq.queue, work)
+}
+
+func (wq *WorkQueue) Work() {
 	frame := NewFixedFrame(0, false, false, true)
 	// worker pool
 	ctx := context.TODO()
-	sem := semaphore.NewWeighted(maxConcurrent)
+	sem := semaphore.NewWeighted(wq.maxConcurrent)
 
-	for _, item := range workerArray {
+	for _, item := range wq.queue {
 		worker, _ := item.(Worker)
 		sem.Acquire(ctx, 1)
 		line, _ := frame.Append()

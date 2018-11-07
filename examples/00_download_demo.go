@@ -108,6 +108,11 @@ func main() {
 		{"firefox", 4373, 0},
 		{"counter-strike", 4202, 0},
 	}
-	jotframe.WorkQueue(maxConcurrent, downloads)
+
+	wq := jotframe.NewWorkQueue(maxConcurrent)
+	for _, item := range downloads {
+		wq.AddWork(item)
+	}
+	wq.Work()
 
 }
