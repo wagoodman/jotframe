@@ -133,6 +133,24 @@ func (line *Line) ClearAndClose() error {
 	return line.clear(false)
 }
 
+func (line *Line) Open() error {
+	line.lock.Lock()
+	defer line.lock.Unlock()
+
+	return line.open()
+}
+
+func (line *Line) open() error {
+	if line.closed {
+		line.closed = false
+		if line.closeSignal != nil {
+			line.closeSignal.Add(1)
+		}
+	}
+
+	return nil
+}
+
 func (line *Line) Close() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
