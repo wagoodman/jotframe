@@ -3,7 +3,7 @@ package jotframe
 import (
 	"context"
 
-	ansi "github.com/k0kubun/go-ansi"
+	"github.com/k0kubun/go-ansi"
 	"golang.org/x/sync/semaphore"
 )
 

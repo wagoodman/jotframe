@@ -2,6 +2,7 @@ package jotframe
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -216,7 +217,7 @@ func (frame *logicalFrame) clear() error {
 
 func (frame *logicalFrame) close() error {
 
-	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
+	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal output)
 	if frame.isAtOrPastScreenBottom() {
 		height := frame.visibleHeight()
 		offset := frame.frameStartIdx - ((terminalHeight - height) + 1)
@@ -300,7 +301,7 @@ func (frame *logicalFrame) move(rows int) error {
 
 // ensure that the frame is within the bounds of the terminal
 func (frame *logicalFrame) update() error {
-	height := frame.visibleHeight()
+	height := frame.height()
 
 	// take into account the rows that will be added to the screen realestate
 	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
@@ -308,12 +309,14 @@ func (frame *logicalFrame) update() error {
 	// if the frame has moved past the bottom of the screen, move it up a bit
 	if futureFrameStartIdx+height > terminalHeight {
 		offset := ((terminalHeight - height) + 1) - futureFrameStartIdx
+		logrus.Debug("Past bottom:", offset)
 		return frame.move(offset)
 	}
 
 	// if the frame has moved above the top of the screen, move it down a bit
 	if futureFrameStartIdx < 1 {
 		offset := 1 - futureFrameStartIdx
+		logrus.Debug("Past top:", offset)
 		return frame.move(offset)
 	}
 
