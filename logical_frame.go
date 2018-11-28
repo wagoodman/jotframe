@@ -45,6 +45,15 @@ func (frame *logicalFrame) height() int {
 	return height
 }
 
+func (frame *logicalFrame) visibleHeight() int {
+	height := frame.height()
+
+	if height > terminalHeight {
+		return terminalHeight
+	}
+	return height
+}
+
 func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
 	height := frame.height()
 
@@ -209,7 +218,7 @@ func (frame *logicalFrame) close() error {
 
 	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
 	if frame.isAtOrPastScreenBottom() {
-		height := frame.height()
+		height := frame.visibleHeight()
 		offset := frame.frameStartIdx - ((terminalHeight - height) + 1)
 		offset += 1 // we want to move one line past the frame
 		frame.move(-offset)
@@ -291,7 +300,7 @@ func (frame *logicalFrame) move(rows int) error {
 
 // ensure that the frame is within the bounds of the terminal
 func (frame *logicalFrame) update() error {
-	height := frame.height()
+	height := frame.visibleHeight()
 
 	// take into account the rows that will be added to the screen realestate
 	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
