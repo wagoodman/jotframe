@@ -14,7 +14,7 @@ func main() {
 
 	renderLine := func(idx int, line *jotframe.Line, frame *jotframe.FixedFrame) {
 		// write a message to this line...
-		message := fmt.Sprintf("%s LineIdx:%d", line, idx)
+		message := fmt.Sprintf("%s --------------- LineIdx:%d", line, idx)
 		io.WriteString(line, message)
 
 		line.Close()
