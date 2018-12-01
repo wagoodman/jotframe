@@ -26,4 +26,3 @@ func TrimToVisualLength(message string, length int) string {
 	}
 	return message
 }
-

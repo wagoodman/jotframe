@@ -1,11 +1,11 @@
 package main
 
 import (
-"github.com/wagoodman/jotframe"
-"time"
-"math/rand"
-"fmt"
-"io"
+	"fmt"
+	"github.com/wagoodman/jotframe"
+	"io"
+	"math/rand"
+	"time"
 )
 
 func main() {
@@ -17,9 +17,9 @@ func main() {
 
 		message := fmt.Sprintf("%s %s INITIALIZED", line, time.Now())
 		io.WriteString(line, message)
-		for idx := 100 ; idx > 0 ; idx-- {
+		for idx := 100; idx > 0; idx-- {
 			// sleep for a bit...
-			randomInterval := rand.Intn(maxMs - minMs) + minMs
+			randomInterval := rand.Intn(maxMs-minMs) + minMs
 			time.Sleep(time.Duration(randomInterval) * time.Millisecond)
 
 			// write a message to this line...
@@ -54,4 +54,3 @@ func main() {
 	frame.Wait()
 	frame.Close()
 }
-

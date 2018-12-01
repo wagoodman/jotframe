@@ -1,8 +1,8 @@
 package jotframe
 
 import (
-	"testing"
 	"strconv"
+	"testing"
 )
 
 func contains(s []int, e int) bool {
@@ -17,18 +17,18 @@ func contains(s []int, e int) bool {
 func Test_NewLogicalFrame(t *testing.T) {
 
 	tables := []struct {
-		rows int
-		hasHeader bool
-		hasFooter bool
-		destinationRow int
+		rows              int
+		hasHeader         bool
+		hasFooter         bool
+		destinationRow    int
 		expectedHeaderRow int
 		expectedFooterRow int
-		expectedLineRows []int
+		expectedLineRows  []int
 	}{
-		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14} },
-		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15} },
-		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14} },
-		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15} },
+		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14}},
+		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15}},
+		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14}},
+		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15}},
 	}
 
 	for _, table := range tables {
@@ -88,13 +88,13 @@ func Test_NewLogicalFrame(t *testing.T) {
 func Test_LogicalFrame_Height(t *testing.T) {
 
 	tables := []struct {
-		rows int
-		hasHeader bool
-		hasFooter bool
+		rows           int
+		hasHeader      bool
+		hasFooter      bool
 		expectedHeight int
 	}{
 		{5, false, false, 5},
-		{5, true, false, 6 },
+		{5, true, false, 6},
 		{5, false, true, 6},
 		{5, true, true, 7},
 	}
@@ -109,15 +109,13 @@ func Test_LogicalFrame_Height(t *testing.T) {
 
 }
 
-
-
 func Test_LogicalFrame_IsAtOrPastScreenBottom(t *testing.T) {
 	terminalHeight = 100
 	frameRows := 10
 
 	tables := []struct {
 		destinationRow int
-		isAtBottom bool
+		isAtBottom     bool
 	}{
 		{50, false},
 		{89, false},
@@ -126,7 +124,6 @@ func Test_LogicalFrame_IsAtOrPastScreenBottom(t *testing.T) {
 		{99, true},
 		{100, true},
 		{101, true},
-
 	}
 
 	for _, table := range tables {
@@ -139,26 +136,25 @@ func Test_LogicalFrame_IsAtOrPastScreenBottom(t *testing.T) {
 
 }
 
-
 func Test_LogicalFrame_Append(t *testing.T) {
 
 	tables := []struct {
-		appendRows int
-		hasHeader bool
-		hasFooter bool
-		destinationRow int
+		appendRows        int
+		hasHeader         bool
+		hasFooter         bool
+		destinationRow    int
 		expectedHeaderRow int
 		expectedFooterRow int
-		expectedLineRows []int
+		expectedLineRows  []int
 	}{
-		{1, false, false, 10, -1, -1, []int{10} },
-		{1, true, false, 10, 10, -1, []int{11} },
-		{1, false, true, 10, -1, 11, []int{10} },
-		{1, true, true, 10, 10, 12, []int{11} },
-		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14} },
-		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15} },
-		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14} },
-		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15} },
+		{1, false, false, 10, -1, -1, []int{10}},
+		{1, true, false, 10, 10, -1, []int{11}},
+		{1, false, true, 10, -1, 11, []int{10}},
+		{1, true, true, 10, 10, 12, []int{11}},
+		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14}},
+		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15}},
+		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14}},
+		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15}},
 	}
 
 	for _, table := range tables {
@@ -202,7 +198,6 @@ func Test_LogicalFrame_Append(t *testing.T) {
 	}
 }
 
-
 func Test_LogicalFrame_Prepend(t *testing.T) {
 
 	tables := []struct {
@@ -214,14 +209,14 @@ func Test_LogicalFrame_Prepend(t *testing.T) {
 		expectedFooterRow int
 		expectedLineRows  []int
 	}{
-		{1, false, false, 10, -1, -1, []int{10} },
-		{1, true, false, 10, 10, -1, []int{11} },
-		{1, false, true, 10, -1, 11, []int{10} },
-		{1, true, true, 10, 10, 12, []int{11} },
-		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14} },
-		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15} },
-		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14} },
-		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15} },
+		{1, false, false, 10, -1, -1, []int{10}},
+		{1, true, false, 10, 10, -1, []int{11}},
+		{1, false, true, 10, -1, 11, []int{10}},
+		{1, true, true, 10, 10, 12, []int{11}},
+		{5, false, false, 10, -1, -1, []int{10, 11, 12, 13, 14}},
+		{5, true, false, 10, 10, -1, []int{11, 12, 13, 14, 15}},
+		{5, false, true, 10, -1, 15, []int{10, 11, 12, 13, 14}},
+		{5, true, true, 10, 10, 16, []int{11, 12, 13, 14, 15}},
 	}
 
 	for _, table := range tables {
@@ -266,7 +261,6 @@ func Test_LogicalFrame_Prepend(t *testing.T) {
 	}
 }
 
-
 func Test_LogicalFrame_Insert(t *testing.T) {
 
 	tables := []struct {
@@ -277,10 +271,10 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 		expectedFooterRow int
 		expectedLineRows  []int
 	}{
-		{false, false, 10, -1, -1, []int{10, 11, 12, 13, 14} },
-		{true, false, 10, 10, -1, []int{11, 12, 13, 14, 15} },
-		{false, true, 10, -1, 15, []int{10, 11, 12, 13, 14} },
-		{true, true, 10, 10, 16, []int{11, 12, 13, 14, 15} },
+		{false, false, 10, -1, -1, []int{10, 11, 12, 13, 14}},
+		{true, false, 10, 10, -1, []int{11, 12, 13, 14, 15}},
+		{false, true, 10, -1, 15, []int{10, 11, 12, 13, 14}},
+		{true, true, 10, 10, 16, []int{11, 12, 13, 14, 15}},
 	}
 
 	for _, table := range tables {
@@ -295,7 +289,6 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 		}
 		// write out each index while appending, later check the order
 		line.buffer = []byte(strconv.Itoa(insertIdx))
-
 
 		// check if the number of rows matches
 		if len(frame.activeLines) != finalRows {
@@ -313,7 +306,6 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 			t.Errorf("LogicalFrame.insert(): expected %d, got %d", insertIdx, actualNum)
 		}
 
-
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
 		for idx, expectedRow := range table.expectedLineRows {
@@ -325,21 +317,19 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 	}
 }
 
-
-
 func Test_LogicalFrame_Remove(t *testing.T) {
 
 	tables := []struct {
-		startRows         int
-		hasHeader         bool
-		hasFooter         bool
-		destinationRow    int
-		expectedLineRows  []int
+		startRows        int
+		hasHeader        bool
+		hasFooter        bool
+		destinationRow   int
+		expectedLineRows []int
 	}{
-		{6, false, false, 10, []int{10, 11, 12, 13, 14} },
-		{6, true, false, 10, []int{11, 12, 13, 14, 15} },
-		{6, false, true, 10, []int{10, 11, 12, 13, 14} },
-		{6, true, true, 10, []int{11, 12, 13, 14, 15} },
+		{6, false, false, 10, []int{10, 11, 12, 13, 14}},
+		{6, true, false, 10, []int{11, 12, 13, 14, 15}},
+		{6, false, true, 10, []int{10, 11, 12, 13, 14}},
+		{6, true, true, 10, []int{11, 12, 13, 14, 15}},
 	}
 
 	for _, table := range tables {
@@ -385,20 +375,19 @@ func Test_LogicalFrame_Remove(t *testing.T) {
 	}
 }
 
-
 func Test_LogicalFrame_Clear(t *testing.T) {
 
 	tables := []struct {
-		startRows           int
-		hasHeader           bool
-		hasFooter           bool
-		destinationRow      int
-		expectedClearRows  []int
+		startRows         int
+		hasHeader         bool
+		hasFooter         bool
+		destinationRow    int
+		expectedClearRows []int
 	}{
 		{5, false, false, 10, []int{10, 11, 12, 13, 14}},
-		{5, true, false, 10, []int{10, 11, 12, 13, 14, 15} },
-		{5, false, true, 10, []int{10, 11, 12, 13, 14, 15} },
-		{5, true, true, 10, []int{10, 11, 12, 13, 14, 15, 16} },
+		{5, true, false, 10, []int{10, 11, 12, 13, 14, 15}},
+		{5, false, true, 10, []int{10, 11, 12, 13, 14, 15}},
+		{5, true, true, 10, []int{10, 11, 12, 13, 14, 15, 16}},
 	}
 
 	for _, table := range tables {
@@ -434,15 +423,15 @@ func Test_LogicalFrame_Clear(t *testing.T) {
 func Test_LogicalFrame_Close(t *testing.T) {
 
 	tables := []struct {
-		startRows           int
-		hasHeader           bool
-		hasFooter           bool
-		destinationRow      int
+		startRows      int
+		hasHeader      bool
+		hasFooter      bool
+		destinationRow int
 	}{
 		{5, false, false, 10},
-		{5, true, false, 10 },
-		{5, false, true, 10 },
-		{5, true, true, 10 },
+		{5, true, false, 10},
+		{5, false, true, 10},
+		{5, true, true, 10},
 	}
 
 	for _, table := range tables {
@@ -474,16 +463,16 @@ func Test_LogicalFrame_Close(t *testing.T) {
 func Test_LogicalFrame_Move(t *testing.T) {
 
 	tables := []struct {
-		startRows           int
-		hasHeader           bool
-		hasFooter           bool
-		destinationRow      int
-		moveRows            int
+		startRows      int
+		hasHeader      bool
+		hasFooter      bool
+		destinationRow int
+		moveRows       int
 	}{
-		{5, false, false, 10, 5 },
-		{5, true, false, 10, -5 },
-		{5, false, true, 10, 5 },
-		{5, true, true, 10, -5 },
+		{5, false, false, 10, 5},
+		{5, true, false, 10, -5},
+		{5, false, true, 10, 5},
+		{5, true, true, 10, -5},
 	}
 
 	for _, table := range tables {
@@ -534,7 +523,7 @@ func Test_LogicalFrame_Update(t *testing.T) {
 
 	tables := []struct {
 		destinationRow int
-		adjustedRow int
+		adjustedRow    int
 	}{
 		{-20, 1},
 		{-2, 1},
@@ -547,7 +536,6 @@ func Test_LogicalFrame_Update(t *testing.T) {
 		{99, 90},
 		{100, 90},
 		{110, 90},
-
 	}
 
 	for _, table := range tables {

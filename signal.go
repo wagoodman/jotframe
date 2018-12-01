@@ -2,9 +2,9 @@ package jotframe
 
 import (
 	"os"
+	"os/signal"
 	"syscall"
 	"unsafe"
-	"os/signal"
 )
 
 var (
