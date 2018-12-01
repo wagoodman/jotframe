@@ -23,14 +23,6 @@ func NewFixedFrameAt(rows int, hasHeader, hasFooter, includeTrailOnRemove bool, 
 	defer frame.lock.Unlock()
 	defer frame.logicalFrame.updateAndDraw()
 
-	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
-	if frame.logicalFrame.isAtOrPastScreenBottom() {
-		height := frame.logicalFrame.height()
-		offset := frame.logicalFrame.frameStartIdx - ((terminalHeight - height)+1)
-		frame.logicalFrame.move(-offset)
-		frame.logicalFrame.rowAdvancements += offset
-	}
-
 	return frame
 }
 

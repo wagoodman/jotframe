@@ -45,6 +45,15 @@ func (frame *logicalFrame) height() int {
 	return height
 }
 
+func (frame *logicalFrame) visibleHeight() int {
+	height := frame.height()
+
+	if height > terminalHeight {
+		return terminalHeight
+	}
+	return height
+}
+
 func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
 	height := frame.height()
 
@@ -207,14 +216,14 @@ func (frame *logicalFrame) clear() error {
 
 func (frame *logicalFrame) close() error {
 
-	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal outpu)
-	if frame.isAtOrPastScreenBottom() {
-		height := frame.height()
-		offset := frame.frameStartIdx - ((terminalHeight - height) + 1)
-		offset += 1 // we want to move one line past the frame
-		frame.move(-offset)
-		frame.rowAdvancements += offset
-	}
+	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal output)
+	// if frame.isAtOrPastScreenBottom() {
+	// 	height := frame.visibleHeight()
+	// 	offset := frame.frameStartIdx - ((terminalHeight - height) + 1)
+	// 	offset += 1 // we want to move one line past the frame
+	// 	frame.move(-offset)
+	// 	frame.rowAdvancements += offset
+	// }
 
 	if frame.header != nil {
 		err := frame.header.close()
@@ -298,7 +307,7 @@ func (frame *logicalFrame) update() error {
 
 	// if the frame has moved past the bottom of the screen, move it up a bit
 	if futureFrameStartIdx+height > terminalHeight {
-		offset := ((terminalHeight - height) + 1) - futureFrameStartIdx
+		offset := (terminalHeight - height) - futureFrameStartIdx
 		return frame.move(offset)
 	}
 
@@ -390,5 +399,5 @@ func (frame *logicalFrame) draw() error {
 
 func (frame *logicalFrame) wait() {
 	frame.closeSignal.Wait()
-	setCursorRow(frame.frameStartIdx + frame.height())
+	// setCursorRow(frame.frameStartIdx + frame.height())
 }
