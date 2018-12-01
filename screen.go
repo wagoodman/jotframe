@@ -1,15 +1,15 @@
 package jotframe
 
 import (
-	"fmt"
-	"sync"
-	"golang.org/x/crypto/ssh/terminal"
 	"bufio"
+	"fmt"
+	"github.com/k0kubun/go-ansi"
+	"golang.org/x/crypto/ssh/terminal"
 	"os"
-	"strings"
 	"regexp"
 	"strconv"
-	"github.com/k0kubun/go-ansi"
+	"strings"
+	"sync"
 )
 
 var (

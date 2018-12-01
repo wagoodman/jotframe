@@ -33,8 +33,8 @@ func NewBottomFrame(rows int, hasHeader, hasFooter bool, includeTrailOnRemove bo
 	}
 
 	// if we start drawing now, we'll be past the bottom of the screen, preserve the current terminal history
-	if currentRow + frameHeight > terminalHeight {
-		offset := currentRow - ((terminalHeight - height)+1)
+	if currentRow+frameHeight > terminalHeight {
+		offset := currentRow - ((terminalHeight - height) + 1)
 		frame.logicalFrame.rowAdvancements += offset
 	}
 
@@ -161,7 +161,7 @@ func (frame *BottomFrame) ClearAndClose() error {
 // update any positions based on external data and redraw
 func (frame *BottomFrame) update() error {
 	height := frame.logicalFrame.height()
-	targetFrameStartIndex := (terminalHeight - height)+1
+	targetFrameStartIndex := (terminalHeight - height) + 1
 	if frame.logicalFrame.frameStartIdx != targetFrameStartIndex {
 		// reset the frame and all activeLines to the correct offset. This must be done with new
 		// lines since we should not overwrite the trail rows above the frame.

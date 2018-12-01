@@ -1,24 +1,24 @@
 package main
 
 import (
-	"math/rand"
-	"github.com/wagoodman/jotframe"
-	"time"
 	"fmt"
-	"io"
 	"github.com/k0kubun/go-ansi"
+	"github.com/wagoodman/jotframe"
+	"io"
+	"math/rand"
+	"time"
 )
 
 func randomInt(min, max int) int {
 	// this is a good test for race conditions ;)
 	// rand.Seed(time.Now().Unix())
-	return rand.Intn(max - min) + min
+	return rand.Intn(max-min) + min
 }
 
 func randomString(len int) string {
 	bytes := make([]byte, len)
 	for i := 0; i < len; i++ {
-		bytes[i] = byte(65 + rand.Intn(25))  //A=65 and Z = 65+25
+		bytes[i] = byte(65 + rand.Intn(25)) //A=65 and Z = 65+25
 	}
 	return string(bytes)
 }
@@ -84,12 +84,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		go renderLine(lines + idx, line, frame)
+		go renderLine(lines+idx, line, frame)
 	}
 
-	time.Sleep(time.Duration(200)*time.Millisecond)
+	time.Sleep(time.Duration(200) * time.Millisecond)
 
-	for idx := len(frame.Lines())-1; idx > 0; idx-- {
+	for idx := len(frame.Lines()) - 1; idx > 0; idx-- {
 		time.Sleep(time.Duration(200) * time.Millisecond)
 		// frame.Lines()[idx].ClearAndClose()
 		frame.Remove(frame.Lines()[idx])
@@ -98,7 +98,6 @@ func main() {
 	frame.ClearAndClose()
 	ansi.CursorShow()
 }
-
 
 // func main() {
 // 	ansi.CursorHide()
@@ -175,9 +174,6 @@ func main() {
 // 	frame.ClearAndClose()
 // 	ansi.CursorShow()
 // }
-
-
-
 
 //
 // func main() {

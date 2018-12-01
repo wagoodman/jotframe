@@ -1,8 +1,8 @@
 package jotframe
 
 import (
-	"testing"
 	"sync"
+	"testing"
 )
 
 func Test_NewLine(t *testing.T) {
@@ -11,15 +11,15 @@ func Test_NewLine(t *testing.T) {
 
 	expectedRow := 22
 	actualRow := line.row
-	if expectedRow!= actualRow {
+	if expectedRow != actualRow {
 		t.Errorf("NewLine(): expected row of %d, but is at row %d", expectedRow, actualRow)
 	}
 }
 
 func Test_Line_String(t *testing.T) {
 	tables := []struct {
-		row int
-		message string
+		row         int
+		message     string
 		expectedStr string
 	}{
 		{1, "This test will do well..", "<Line row:1 closed:false bufferLen:24>"},
@@ -41,7 +41,7 @@ func Test_Line_String(t *testing.T) {
 
 func Test_Line_move(t *testing.T) {
 	tables := []struct {
-		row int
+		row      int
 		moveRows int
 	}{
 		{1, 12},
@@ -60,7 +60,7 @@ func Test_Line_move(t *testing.T) {
 			t.Errorf("Line.move(): expected row '%d', but got row '%d'", expectedResult, actualResult)
 		}
 
-		if !line.stale{
+		if !line.stale {
 			t.Errorf("Line.move(): expected line %d to be stale, but was not", line.row)
 		}
 	}

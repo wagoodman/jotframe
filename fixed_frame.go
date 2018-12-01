@@ -1,6 +1,5 @@
 package jotframe
 
-
 func NewFixedFrame(rows int, hasHeader, hasFooter, includeTrailOnRemove bool) *FixedFrame {
 	currentRow, err := GetCursorRow()
 	if err != nil {
