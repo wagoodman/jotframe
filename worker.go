@@ -47,6 +47,7 @@ func (wq *WorkQueue) Work() {
 	}
 
 	frame.Wait()
+	frame.Close()
 
 	ansi.CursorShow()
 }

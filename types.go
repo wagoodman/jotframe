@@ -6,6 +6,21 @@ import (
 	"github.com/google/uuid"
 )
 
+var screenHandlers = make([]ScreenEventHandler,0)
+
+func addScreenHandler(handler ScreenEventHandler) {
+	screenHandlers = append(screenHandlers, handler)
+}
+
+type ScreenEventHandler interface {
+	onEvent(*ScreenEvent)
+}
+
+type ScreenEvent struct {
+	value []byte
+	row   int
+}
+
 type Line struct {
 	id          uuid.UUID
 	buffer      []byte
@@ -13,7 +28,7 @@ type Line struct {
 	lock        *sync.Mutex
 	closeSignal *sync.WaitGroup
 	closed      bool
-	stale       bool
+	// stale       bool
 }
 
 type logicalFrame struct {
@@ -28,7 +43,7 @@ type logicalFrame struct {
 	closeSignal   *sync.WaitGroup
 	updateFn      func() error
 	closed        bool
-	stale         bool
+	// stale         bool
 }
 
 type TopFrame struct {

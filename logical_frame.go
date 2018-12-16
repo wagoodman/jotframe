@@ -2,6 +2,7 @@ package jotframe
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -54,14 +55,25 @@ func (frame *logicalFrame) visibleHeight() int {
 	return height
 }
 
+func (frame *logicalFrame) isAtOrPastScreenTop() bool {
+	// take into account the rows that will be added to the screen realestate
+	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
+
+	if futureFrameStartIdx < 1 {
+		return true
+	}
+	return false
+}
+
 func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
 	height := frame.height()
 
 	// take into account the rows that will be added to the screen realestate
 	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
 
+	logrus.Debug(futureFrameStartIdx, "=", frame.frameStartIdx, "-", frame.rowAdvancements)
 	// if the frame has moved past the bottom of the screen, move it up a bit
-	if futureFrameStartIdx+height > terminalHeight {
+	if futureFrameStartIdx + height > terminalHeight {
 		return true
 	}
 	return false
@@ -300,20 +312,20 @@ func (frame *logicalFrame) move(rows int) error {
 
 // ensure that the frame is within the bounds of the terminal
 func (frame *logicalFrame) update() error {
-	height := frame.height()
-
-	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
-
 	// if the frame has moved past the bottom of the screen, move it up a bit
-	if futureFrameStartIdx+height > terminalHeight {
-		offset := (terminalHeight - height) - futureFrameStartIdx
-		return frame.move(offset)
+	if frame.isAtOrPastScreenBottom()  {
+		frameHeight := frame.visibleHeight()
+		// offset is how many rows the frame needs to be adjusted to fit on the screen.
+		// This is the same as how many rows past the edge of the screen this frame currently is.
+		offset := (frame.frameStartIdx + frameHeight) - terminalHeight
+		offset += 1 // we want to move one line past the frame
+		frame.move(-offset)
+		frame.rowAdvancements += offset
 	}
 
 	// if the frame has moved above the top of the screen, move it down a bit
-	if futureFrameStartIdx < 1 {
-		offset := 1 - futureFrameStartIdx
+	if frame.isAtOrPastScreenTop() {
+		offset := -1*frame.frameStartIdx + 1
 		return frame.move(offset)
 	}
 
@@ -337,7 +349,7 @@ func (frame *logicalFrame) draw() error {
 	for _, row := range frame.clearRows {
 		err := clearRow(row)
 		if err != nil {
-			return err
+			panic( err)
 		}
 	}
 	frame.clearRows = make([]int, 0)
@@ -364,30 +376,30 @@ func (frame *logicalFrame) draw() error {
 
 	// paint all stale lines to the screen
 	if frame.header != nil {
-		if frame.header.stale || frame.stale {
+		// if frame.header.stale || frame.stale {
 			_, err := frame.header.write(frame.header.buffer)
 			if err != nil {
-				return err
+				panic( err)
 			}
-		}
+		// }
 	}
 
 	for _, line := range frame.activeLines {
-		if line.stale || frame.stale {
+		// if line.stale || frame.stale {
 			_, err := line.write(line.buffer)
 			if err != nil {
-				return err
+				panic( err)
 			}
-		}
+		// }
 	}
 
 	if frame.footer != nil {
-		if frame.footer.stale || frame.stale {
+		// if frame.footer.stale || frame.stale {
 			_, err := frame.footer.write(frame.footer.buffer)
 			if err != nil {
-				return err
+				panic( err)
 			}
-		}
+		// }
 	}
 
 	if frame.isClosed() {

@@ -1,6 +1,9 @@
 package jotframe
 
 import (
+	"bytes"
+	"fmt"
+	"os"
 	"strconv"
 	"testing"
 )
@@ -420,6 +423,7 @@ func Test_LogicalFrame_Clear(t *testing.T) {
 	}
 }
 
+// todo: rewrite this
 func Test_LogicalFrame_Close(t *testing.T) {
 
 	tables := []struct {
@@ -545,6 +549,89 @@ func Test_LogicalFrame_Update(t *testing.T) {
 		if table.adjustedRow != actualResult {
 			t.Errorf("LogicalFrame.update(): expected update row of %d, but is at row %d", table.adjustedRow, actualResult)
 		}
+	}
+
+}
+
+
+func suppressOutput(f func()) {
+	originalStdOut := os.Stdout
+	var err error
+	os.Stdout, err = os.OpenFile(os.DevNull, os.O_WRONLY, 0755)
+	if err != nil {
+		panic(err)
+	}
+	f()
+	os.Stdout = originalStdOut
+}
+
+type TestEventHandler struct {
+	t      *testing.T
+	events []*ScreenEvent
+}
+
+func NewTestEventHandler(t *testing.T) *TestEventHandler {
+	return &TestEventHandler{
+		t: t,
+		events: make([]*ScreenEvent, 0),
+	}
+}
+
+func (handler *TestEventHandler) onEvent(event *ScreenEvent) {
+	handler.events = append(handler.events, event)
+}
+
+func Test_LogicalFrame_draw(t *testing.T) {
+
+	tables := []struct {
+		rows              int
+		hasHeader         bool
+		hasFooter         bool
+		destinationRow    int
+		expectedEvents  []ScreenEvent
+	}{
+		{3, false, false, 10, []ScreenEvent{
+			{row: 10, value: []byte("sweets")},
+		}},
+	}
+
+	for _, table := range tables {
+		suppressOutput(func() {
+			// setup...
+			handler := NewTestEventHandler(t)
+			addScreenHandler(handler)
+			t.Log("Screen Handlers:", len(screenHandlers))
+			t.Log("Terminal Height:", terminalHeight)
+
+			// run test...
+			frame := newLogicalFrameAt(table.rows, table.hasHeader, table.hasFooter, table.destinationRow)
+			for idx, line := range frame.activeLines {
+				line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
+			}
+			err := frame.draw()
+			if err != nil {
+				t.Fatalf(err.Error())
+			}
+
+			// assert results...
+			if len(table.expectedEvents) != len(handler.events) {
+				for idx, event := range handler.events {
+					handler.t.Log(fmt.Sprintf("   Event %d: row:%d value:'%s'", idx, event.row, string(event.value)))
+				}
+				t.Fatalf("expected %d events, got %d", len(table.expectedEvents), len(handler.events))
+			}
+
+			for idx, event := range table.expectedEvents {
+
+				if bytes.Compare(event.value, handler.events[idx].value) == 0 {
+					t.Errorf("expected value='%v', got '%v'", string(event.value), string(handler.events[idx].value))
+				}
+
+				if event.row != handler.events[idx].row {
+					t.Errorf("expected row='%v', got '%v'", string(event.row), string(handler.events[idx].row))
+				}
+			}
+		})
 	}
 
 }

@@ -17,6 +17,15 @@ var (
 	screenLock *sync.Mutex
 )
 
+func NewScreenEvent(line *Line) *ScreenEvent {
+	e := &ScreenEvent{
+		row: line.row,
+		value: make([]byte, len(line.buffer)),
+	}
+	copy(e.value, line.buffer)
+	return e
+}
+
 func advanceScreen(rows int) {
 	setCursorRow(terminalHeight)
 	fmt.Print(strings.Repeat("\n", rows))
@@ -34,7 +43,7 @@ func clearScreen() {
 func clearRow(row int) error {
 	err := setCursorRow(row)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	ansi.EraseInLine(2)
 	return nil
@@ -50,11 +59,14 @@ func getScreenLock() *sync.Mutex {
 // todo: will this be supported on windows?... https://github.com/nsf/termbox-go/blob/master/termbox_windows.go
 // currently assumed VT100 compatible emulator
 func setCursorRow(row int) error {
-	oldState, err := terminal.MakeRaw(0)
-	if err != nil {
-		return err
-	}
-	defer terminal.Restore(0, oldState)
+	// todo: is this "really" needed?
+	// if isatty.IsTerminal(os.Stdin.Fd()) {
+	// 	oldState, err := terminal.MakeRaw(0)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	defer terminal.Restore(0, oldState)
+	// }
 
 	// sets the cursor position where subsequent text will begin: <ESC>[{ROW};{COLUMN}H
 	// great resource: http://www.termsys.demon.co.uk/vtansi.htm

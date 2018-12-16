@@ -86,7 +86,7 @@ func (item Resource) Work(line *jotframe.Line) {
 }
 
 func main() {
-	const maxConcurrent = 4
+	const maxConcurrent = 5
 	ansi.CursorHide()
 	rand.Seed(time.Now().Unix())
 

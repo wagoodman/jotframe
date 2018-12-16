@@ -20,8 +20,18 @@ func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
 		id:          uuid.New(),
 		row:         row,
 		lock:        getScreenLock(),
-		stale:       true,
+		// stale:       true,
 		closeSignal: closeSignal,
+	}
+}
+
+func (line *Line) notify() {
+	if len(screenHandlers) == 0 {
+		return
+	}
+	event := NewScreenEvent(line)
+	for _, handler := range screenHandlers {
+		handler.onEvent(event)
 	}
 }
 
@@ -43,7 +53,7 @@ func (line Line) String() string {
 
 func (line *Line) move(rows int) error {
 	line.row += rows
-	line.stale = true
+	// line.stale = true
 	return nil
 }
 
@@ -68,6 +78,7 @@ func (line *Line) clear(preserveBuffer bool) error {
 	if !preserveBuffer {
 		line.buffer = []byte("")
 	}
+	line.notify()
 	return nil
 }
 
@@ -112,6 +123,7 @@ func (line *Line) write(buff []byte) (int, error) {
 	}
 	ansi.CursorHorizontalAbsolute(0)
 
+	line.notify()
 	return os.Stdout.Write(line.buffer)
 }
 
