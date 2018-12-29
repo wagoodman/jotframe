@@ -159,7 +159,7 @@ func (frame *BottomFrame) ClearAndClose() error {
 }
 
 // update any positions based on external data and redraw
-func (frame *BottomFrame) update() error {
+func (frame *BottomFrame) update(_ *logicalFrame) error {
 	height := frame.logicalFrame.height()
 	targetFrameStartIndex := (terminalHeight - height) + 1
 	if frame.logicalFrame.frameStartIdx != targetFrameStartIndex {

@@ -6,9 +6,9 @@ import (
 	"sync"
 )
 
-func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, destinationRow int) *logicalFrame {
+func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, firstRow int) *logicalFrame {
 	frame := &logicalFrame{}
-	frame.frameStartIdx = destinationRow
+	frame.frameStartIdx = firstRow
 	frame.closeSignal = &sync.WaitGroup{}
 
 	var relativeRow int
@@ -286,11 +286,7 @@ func (frame *logicalFrame) isClosed() bool {
 	return frame.closed
 }
 
-func (frame *logicalFrame) move(rows int) error {
-	// todo: check real screen dimensions for moving past bottom of screen
-	if frame.frameStartIdx+rows < 0 {
-		return fmt.Errorf("unable to move past screen dimensions")
-	}
+func (frame *logicalFrame) move(rows int) {
 	frame.frameStartIdx += rows
 
 	// todo: instead of clearing all frame lines, only clear the ones affected
@@ -306,50 +302,39 @@ func (frame *logicalFrame) move(rows int) error {
 	if frame.footer != nil {
 		frame.footer.move(rows)
 	}
-
-	return nil
 }
 
 // ensure that the frame is within the bounds of the terminal
 func (frame *logicalFrame) update() error {
-	// if the frame has moved past the bottom of the screen, move it up a bit
-	if frame.isAtOrPastScreenBottom()  {
-		frameHeight := frame.visibleHeight()
-		// offset is how many rows the frame needs to be adjusted to fit on the screen.
-		// This is the same as how many rows past the edge of the screen this frame currently is.
-		offset := (frame.frameStartIdx + frameHeight) - terminalHeight
-		offset += 1 // we want to move one line past the frame
-		frame.move(-offset)
-		frame.rowAdvancements += offset
-	}
-
-	// if the frame has moved above the top of the screen, move it down a bit
-	if frame.isAtOrPastScreenTop() {
-		offset := -1*frame.frameStartIdx + 1
-		return frame.move(offset)
+	if frame.updateFn != nil {
+		err := frame.updateFn(frame)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (frame *logicalFrame) updateAndDraw() {
-	if frame.updateFn != nil {
-		frame.updateFn()
+func (frame *logicalFrame) updateAndDraw() (errs []error)  {
+	errs = make([]error, 0)
+
+	err := frame.update()
+	if err != nil {
+		errs = append(errs, err)
 	}
 
-	// don't allow any update function to draw outside of the screen dimensions
-	frame.update()
-
-	frame.draw()
+	return append(errs, frame.draw()...)
 }
 
-func (frame *logicalFrame) draw() error {
+func (frame *logicalFrame) draw() (errs []error) {
+	errs = make([]error, 0)
 
 	// clear any marked lines (preserving the buffer) while these indexes still exist
 	for _, row := range frame.clearRows {
 		err := clearRow(row)
 		if err != nil {
-			panic( err)
+			errs = append(errs, err)
 		}
 	}
 	frame.clearRows = make([]int, 0)
@@ -376,37 +361,37 @@ func (frame *logicalFrame) draw() error {
 
 	// paint all stale lines to the screen
 	if frame.header != nil {
-		// if frame.header.stale || frame.stale {
+		if frame.header.stale || frame.stale {
 			_, err := frame.header.write(frame.header.buffer)
 			if err != nil {
-				panic( err)
+				errs = append(errs, err)
 			}
-		// }
+		}
 	}
 
 	for _, line := range frame.activeLines {
-		// if line.stale || frame.stale {
+		if line.stale || frame.stale {
 			_, err := line.write(line.buffer)
 			if err != nil {
-				panic( err)
+				errs = append(errs, err)
 			}
-		// }
+		}
 	}
 
 	if frame.footer != nil {
-		// if frame.footer.stale || frame.stale {
+		if frame.footer.stale || frame.stale {
 			_, err := frame.footer.write(frame.footer.buffer)
 			if err != nil {
-				panic( err)
+				errs = append(errs, err)
 			}
-		// }
+		}
 	}
 
 	if frame.isClosed() {
 		setCursorRow(frame.frameStartIdx + frame.height())
 	}
 
-	return nil
+	return errs
 }
 
 func (frame *logicalFrame) wait() {

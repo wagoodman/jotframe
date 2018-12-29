@@ -28,7 +28,7 @@ type Line struct {
 	lock        *sync.Mutex
 	closeSignal *sync.WaitGroup
 	closed      bool
-	// stale       bool
+	stale       bool
 }
 
 type logicalFrame struct {
@@ -41,9 +41,9 @@ type logicalFrame struct {
 
 	frameStartIdx int
 	closeSignal   *sync.WaitGroup
-	updateFn      func() error
+	updateFn      func(*logicalFrame) error
 	closed        bool
-	// stale         bool
+	stale         bool
 }
 
 type TopFrame struct {

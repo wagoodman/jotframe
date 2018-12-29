@@ -1,7 +1,6 @@
 package jotframe
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,7 +19,7 @@ func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
 		id:          uuid.New(),
 		row:         row,
 		lock:        getScreenLock(),
-		// stale:       true,
+		stale:       true,
 		closeSignal: closeSignal,
 	}
 }
@@ -51,10 +50,9 @@ func (line Line) String() string {
 	return fmt.Sprintf("<Line row:%d closed:%v bufferLen:%d>", line.row, line.closed, len(line.buffer))
 }
 
-func (line *Line) move(rows int) error {
+func (line *Line) move(rows int) {
 	line.row += rows
-	// line.stale = true
-	return nil
+	line.stale = true
 }
 
 func (line *Line) Clear() error {
@@ -114,7 +112,7 @@ func (line *Line) write(buff []byte) (int, error) {
 	line.buffer = []byte(strings.Split(string(buff), "\n")[0])
 
 	if line.row < 0 || line.row > terminalHeight {
-		return -1, errors.New("line is out of bounds")
+		return -1, fmt.Errorf("line is out of bounds (row=%d)", line.row)
 	}
 
 	err := clearRow(line.row)

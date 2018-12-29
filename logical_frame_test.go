@@ -1,9 +1,7 @@
 package jotframe
 
 import (
-	"bytes"
 	"fmt"
-	"os"
 	"strconv"
 	"testing"
 )
@@ -481,10 +479,7 @@ func Test_LogicalFrame_Move(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrameAt(table.startRows, table.hasHeader, table.hasFooter, table.destinationRow)
-		err := frame.move(table.moveRows)
-		if err != nil {
-			t.Errorf("LogicalFrame.move(): expected no error on move(), got %v", err)
-		}
+		frame.move(table.moveRows)
 
 		expectedFrameRow := table.destinationRow + table.moveRows
 		actualFrameRow := frame.frameStartIdx
@@ -525,6 +520,26 @@ func Test_LogicalFrame_Update(t *testing.T) {
 	terminalHeight = 100
 	frameRows := 10
 
+	fn := func (frame *logicalFrame) error {
+		// if the frame has moved past the bottom of the screen, move it up a bit
+		if frame.isAtOrPastScreenBottom()  {
+			frameHeight := frame.visibleHeight()
+			// offset is how many rows the frame needs to be adjusted to fit on the screen.
+			// This is the same as how many rows past the edge of the screen this frame currently is.
+			offset := (frame.frameStartIdx + frameHeight) - terminalHeight
+			// offset += 1 // we want to move one line past the frame
+			frame.move(-offset)
+			frame.rowAdvancements += offset
+		}
+
+		// if the frame has moved above the top of the screen, move it down a bit
+		if frame.isAtOrPastScreenTop() {
+			offset := -1*frame.frameStartIdx + 1
+			frame.move(offset)
+		}
+		return nil
+	}
+
 	tables := []struct {
 		destinationRow int
 		adjustedRow    int
@@ -544,6 +559,7 @@ func Test_LogicalFrame_Update(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrameAt(frameRows, false, false, table.destinationRow)
+		frame.updateFn = fn
 		frame.update()
 		actualResult := frame.frameStartIdx
 		if table.adjustedRow != actualResult {
@@ -553,84 +569,225 @@ func Test_LogicalFrame_Update(t *testing.T) {
 
 }
 
-
-func suppressOutput(f func()) {
-	originalStdOut := os.Stdout
-	var err error
-	os.Stdout, err = os.OpenFile(os.DevNull, os.O_WRONLY, 0755)
-	if err != nil {
-		panic(err)
-	}
-	f()
-	os.Stdout = originalStdOut
+var drawTestCases = map[string]drawTestParams {
+	"goCase": {3, false, false, 10, 40,
+		[]ScreenEvent{
+			{row: 10, value: []byte("LineIdx:0")},
+			{row: 11, value: []byte("LineIdx:1")},
+			{row: 12, value: []byte("LineIdx:2")},
+		},
+		[]string{},
+	},
+	"goCase_Header": {3, true, false, 10, 40,
+		[]ScreenEvent{
+			{row: 10, value: []byte("theHeader")},
+			{row: 11, value: []byte("LineIdx:0")},
+			{row: 12, value: []byte("LineIdx:1")},
+			{row: 13, value: []byte("LineIdx:2")},
+		},
+		[]string{},
+	},
+	"goCase_Footer": {3, false, true, 10, 40,
+		[]ScreenEvent{
+			{row: 10, value: []byte("LineIdx:0")},
+			{row: 11, value: []byte("LineIdx:1")},
+			{row: 12, value: []byte("LineIdx:2")},
+			{row: 13, value: []byte("theFooter")},
+		},
+		[]string{},
+	},
+	"goCase_HeaderFooter": {3, true, true, 10, 40,
+		[]ScreenEvent{
+			{row: 10, value: []byte("theHeader")},
+			{row: 11, value: []byte("LineIdx:0")},
+			{row: 12, value: []byte("LineIdx:1")},
+			{row: 13, value: []byte("LineIdx:2")},
+			{row: 14, value: []byte("theFooter")},
+		},
+		[]string{},
+	},
+	"termHeightSmall_Top": {3, false, false, 1, 2,
+		[]ScreenEvent{
+			{row: 1, value: []byte("LineIdx:0")},
+			{row: 2, value: []byte("LineIdx:1")},
+		},
+		[]string{
+			"line is out of bounds (row=3)",
+		},
+	},
+	"termHeightSmall_Top_Header": {3, true, false, 1, 2,
+		[]ScreenEvent{
+			{row: 1, value: []byte("theHeader")},
+			{row: 2, value: []byte("LineIdx:0")},
+		},
+		[]string{
+			"line is out of bounds (row=3)",
+			"line is out of bounds (row=4)",
+		},
+	},
+	"termHeightSmall_Top_Footer": {3, false, true, 1, 2,
+		[]ScreenEvent{
+			{row: 1, value: []byte("LineIdx:0")},
+			{row: 2, value: []byte("LineIdx:1")},
+		},
+		[]string{
+			"line is out of bounds (row=3)",
+			"line is out of bounds (row=4)",
+		},
+	},
+	"termHeightSmall_Top_HeaderFooter": {3, true, true, 1, 2,
+		[]ScreenEvent{
+			{row: 1, value: []byte("theHeader")},
+			{row: 2, value: []byte("LineIdx:0")},
+		},
+		[]string{
+			"line is out of bounds (row=3)",
+			"line is out of bounds (row=4)",
+			"line is out of bounds (row=5)",
+		},
+	},
+	"termHeightSmall_Bottom": {3, false, false, 49, 50,
+		[]ScreenEvent{
+			{row: 49, value: []byte("LineIdx:0")},
+			{row: 50, value: []byte("LineIdx:1")},
+		},
+		[]string{
+			"line is out of bounds (row=51)",
+		},
+	},
+	"termHeightSmall_Bottom_Header": {3, true, false, 49, 50,
+		[]ScreenEvent{
+			{row: 49, value: []byte("theHeader")},
+			{row: 50, value: []byte("LineIdx:0")},
+		},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+		},
+	},
+	"termHeightSmall_Bottom_Footer": {3, false, true, 49, 50,
+		[]ScreenEvent{
+			{row: 49, value: []byte("LineIdx:0")},
+			{row: 50, value: []byte("LineIdx:1")},
+		},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+		},
+	},
+	"termHeightSmall_Bottom_HeaderFooter": {3, true, true, 49, 50,
+		[]ScreenEvent{
+			{row: 49, value: []byte("theHeader")},
+			{row: 50, value: []byte("LineIdx:0")},
+		},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+			"line is out of bounds (row=53)",
+		},
+	},
 }
 
-type TestEventHandler struct {
-	t      *testing.T
-	events []*ScreenEvent
-}
+func Test_LogicalFrame_Draw(t *testing.T) {
 
-func NewTestEventHandler(t *testing.T) *TestEventHandler {
-	return &TestEventHandler{
-		t: t,
-		events: make([]*ScreenEvent, 0),
-	}
-}
-
-func (handler *TestEventHandler) onEvent(event *ScreenEvent) {
-	handler.events = append(handler.events, event)
-}
-
-func Test_LogicalFrame_draw(t *testing.T) {
-
-	tables := []struct {
-		rows              int
-		hasHeader         bool
-		hasFooter         bool
-		destinationRow    int
-		expectedEvents  []ScreenEvent
-	}{
-		{3, false, false, 10, []ScreenEvent{
-			{row: 10, value: []byte("sweets")},
-		}},
-	}
-
-	for _, table := range tables {
+	for test, table := range drawTestCases {
 		suppressOutput(func() {
 			// setup...
+			terminalHeight = table.terminalHeight
 			handler := NewTestEventHandler(t)
+			screenHandlers = make([]ScreenEventHandler, 0)
 			addScreenHandler(handler)
-			t.Log("Screen Handlers:", len(screenHandlers))
-			t.Log("Terminal Height:", terminalHeight)
 
 			// run test...
-			frame := newLogicalFrameAt(table.rows, table.hasHeader, table.hasFooter, table.destinationRow)
-			for idx, line := range frame.activeLines {
-				line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
+			var errs []error
+			frame := newLogicalFrameAt(table.rows, table.hasHeader, table.hasFooter, table.startRow)
+			if table.hasHeader {
+				frame.header.buffer = []byte("theHeader")
 			}
-			err := frame.draw()
-			if err != nil {
-				t.Fatalf(err.Error())
+			for idx, line := range frame.activeLines {
+				line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
+			}
+			if table.hasFooter {
+				frame.footer.buffer = []byte("theFooter")
+			}
+			errs = frame.draw()
+
+			// assert results...
+			validateEvents(t, test, table, errs, frame, handler)
+
+		})
+	}
+
+}
+
+func Test_LogicalFrame_AdhocDraw(t *testing.T) {
+
+	for test, table := range drawTestCases {
+		suppressOutput(func() {
+			// setup...
+			terminalHeight = table.terminalHeight
+			handler := NewTestEventHandler(t)
+			screenHandlers = make([]ScreenEventHandler, 0)
+			addScreenHandler(handler)
+
+			// run test...
+			var err error
+			var errs = make([]error, 0)
+			frame := newLogicalFrameAt(table.rows, table.hasHeader, table.hasFooter, table.startRow)
+			if table.hasHeader {
+				err = frame.header.WriteString("theHeader")
+				if err != nil {
+					errs = append(errs, err)
+				}
+			}
+			for idx, line := range frame.activeLines {
+				err = line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
+				if err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if table.hasFooter {
+				err = frame.footer.WriteString("theFooter")
+				if err != nil {
+					errs = append(errs, err)
+				}
 			}
 
 			// assert results...
-			if len(table.expectedEvents) != len(handler.events) {
-				for idx, event := range handler.events {
-					handler.t.Log(fmt.Sprintf("   Event %d: row:%d value:'%s'", idx, event.row, string(event.value)))
-				}
-				t.Fatalf("expected %d events, got %d", len(table.expectedEvents), len(handler.events))
+			validateEvents(t, test, table, errs, frame, handler)
+
+		})
+	}
+
+}
+
+func Test_LogicalFrame_UpdateDraw(t *testing.T) {
+
+	for test, table := range drawTestCases {
+		suppressOutput(func() {
+			// setup...
+			terminalHeight = table.terminalHeight
+			handler := NewTestEventHandler(t)
+			screenHandlers = make([]ScreenEventHandler, 0)
+			addScreenHandler(handler)
+
+			// run test...
+			var errs []error
+			frame := newLogicalFrameAt(table.rows, table.hasHeader, table.hasFooter, table.startRow)
+			if table.hasHeader {
+				frame.header.buffer = []byte("theHeader")
 			}
-
-			for idx, event := range table.expectedEvents {
-
-				if bytes.Compare(event.value, handler.events[idx].value) == 0 {
-					t.Errorf("expected value='%v', got '%v'", string(event.value), string(handler.events[idx].value))
-				}
-
-				if event.row != handler.events[idx].row {
-					t.Errorf("expected row='%v', got '%v'", string(event.row), string(handler.events[idx].row))
-				}
+			for idx, line := range frame.activeLines {
+				line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
 			}
+			if table.hasFooter {
+				frame.footer.buffer = []byte("theFooter")
+			}
+			errs = frame.updateAndDraw()
+
+			// assert results...
+			validateEvents(t, test, table, errs, frame, handler)
+
 		})
 	}
 

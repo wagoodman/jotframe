@@ -124,7 +124,8 @@ func (frame *FixedFrame) Move(rows int) error {
 	defer frame.lock.Unlock()
 	defer frame.logicalFrame.updateAndDraw()
 
-	return frame.logicalFrame.move(rows)
+	frame.logicalFrame.move(rows)
+	return nil
 }
 
 func (frame *FixedFrame) Close() error {
