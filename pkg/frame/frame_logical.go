@@ -1,28 +1,29 @@
-package jotframe
+package frame
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, firstRow int) *logicalFrame {
-	frame := &logicalFrame{}
-	frame.frameStartIdx = firstRow
-	frame.closeSignal = &sync.WaitGroup{}
+func newLogicalFrame(config Config) *logicalFrame {
+	frame := &logicalFrame{
+		topRow:      config.startRow,
+		config:      config,
+		closeSignal: &sync.WaitGroup{},
+	}
 
 	var relativeRow int
-	if hasHeader {
+	if config.HasHeader {
 		// todo: should headers have closeSignal waitGroups? or should they be nil?
-		frame.header = NewLine(frame.frameStartIdx+relativeRow, frame.closeSignal)
+		frame.header = NewLine(frame.topRow+relativeRow, frame.closeSignal)
 		relativeRow++
 	}
-	for idx := 0; idx < rows; idx++ {
-		frame.append()
+	for idx := 0; idx < config.Lines; idx++ {
+		frame.Append()
 	}
-	if hasFooter {
+	if config.HasFooter {
 		// todo: should footers have closeSignal waitGroups? or should they be nil?
-		frame.footer = NewLine(frame.frameStartIdx+len(frame.activeLines)+relativeRow, frame.closeSignal)
+		frame.footer = NewLine(frame.topRow+len(frame.activeLines)+relativeRow, frame.closeSignal)
 		relativeRow++
 	}
 
@@ -31,11 +32,31 @@ func newLogicalFrameAt(rows int, hasHeader, hasFooter bool, firstRow int) *logic
 	return frame
 }
 
+func (frame *logicalFrame) Config() Config {
+	return frame.config
+}
+
+func (frame *logicalFrame) Lines() []*Line {
+	return frame.activeLines
+}
+
+func (frame *logicalFrame) Header() *Line {
+	return frame.header
+}
+
+func (frame *logicalFrame) Footer() *Line {
+	return frame.footer
+}
+
+func (frame *logicalFrame) StartIdx() int {
+	return frame.topRow
+}
+
 func (frame *logicalFrame) appendTrail(str string) {
 	frame.trailRows = append(frame.trailRows, str)
 }
 
-func (frame *logicalFrame) height() int {
+func (frame *logicalFrame) Height() int {
 	height := len(frame.activeLines)
 	if frame.header != nil {
 		height++
@@ -47,7 +68,7 @@ func (frame *logicalFrame) height() int {
 }
 
 func (frame *logicalFrame) visibleHeight() int {
-	height := frame.height()
+	height := frame.Height()
 
 	if height > terminalHeight {
 		return terminalHeight
@@ -55,9 +76,9 @@ func (frame *logicalFrame) visibleHeight() int {
 	return height
 }
 
-func (frame *logicalFrame) isAtOrPastScreenTop() bool {
+func (frame *logicalFrame) IsPastScreenTop() bool {
 	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
+	futureFrameStartIdx := frame.topRow - frame.rowAdvancements
 
 	if futureFrameStartIdx < 1 {
 		return true
@@ -65,13 +86,12 @@ func (frame *logicalFrame) isAtOrPastScreenTop() bool {
 	return false
 }
 
-func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
-	height := frame.height()
+func (frame *logicalFrame) IsPastScreenBottom() bool {
+	height := frame.Height()
 
 	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.frameStartIdx - frame.rowAdvancements
+	futureFrameStartIdx := frame.topRow - frame.rowAdvancements
 
-	logrus.Debug(futureFrameStartIdx, "=", frame.frameStartIdx, "-", frame.rowAdvancements)
 	// if the frame has moved past the bottom of the screen, move it up a bit
 	if futureFrameStartIdx + height > terminalHeight {
 		return true
@@ -79,8 +99,8 @@ func (frame *logicalFrame) isAtOrPastScreenBottom() bool {
 	return false
 }
 
-func (frame *logicalFrame) append() (*Line, error) {
-	if frame.isClosed() {
+func (frame *logicalFrame) Append() (*Line, error) {
+	if frame.IsClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
@@ -88,7 +108,7 @@ func (frame *logicalFrame) append() (*Line, error) {
 	if len(frame.activeLines) > 0 {
 		rowIdx = frame.activeLines[len(frame.activeLines)-1].row + 1
 	} else {
-		rowIdx = frame.frameStartIdx
+		rowIdx = frame.topRow
 		if frame.header != nil {
 			rowIdx += 1
 		}
@@ -105,12 +125,12 @@ func (frame *logicalFrame) append() (*Line, error) {
 	return newLine, nil
 }
 
-func (frame *logicalFrame) prepend() (*Line, error) {
-	if frame.isClosed() {
+func (frame *logicalFrame) Prepend() (*Line, error) {
+	if frame.IsClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
-	rowIdx := frame.frameStartIdx
+	rowIdx := frame.topRow
 	if frame.header != nil {
 		rowIdx += 1
 	}
@@ -129,8 +149,8 @@ func (frame *logicalFrame) prepend() (*Line, error) {
 	return newLine, nil
 }
 
-func (frame *logicalFrame) insert(index int) (*Line, error) {
-	if frame.isClosed() {
+func (frame *logicalFrame) Insert(index int) (*Line, error) {
+	if frame.IsClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
@@ -138,7 +158,7 @@ func (frame *logicalFrame) insert(index int) (*Line, error) {
 		return nil, fmt.Errorf("invalid index given")
 	}
 
-	rowIdx := frame.frameStartIdx + index
+	rowIdx := frame.topRow + index
 	if frame.header != nil {
 		rowIdx += 1
 	}
@@ -173,8 +193,8 @@ func (frame *logicalFrame) indexOf(line *Line) int {
 	return matchedIdx
 }
 
-func (frame *logicalFrame) remove(line *Line) error {
-	if frame.isClosed() {
+func (frame *logicalFrame) Remove(line *Line) error {
+	if frame.IsClosed() {
 		return fmt.Errorf("frame is closed")
 	}
 
@@ -195,7 +215,7 @@ func (frame *logicalFrame) remove(line *Line) error {
 		frame.clearRows = append(frame.clearRows, frame.activeLines[len(frame.activeLines)-1].row)
 	}
 
-	// remove the line entry from the list
+	// Remove the line entry from the list
 	frame.activeLines = append(frame.activeLines[:matchedIdx], frame.activeLines[matchedIdx+1:]...)
 
 	// move each line index ahead of the deleted element
@@ -210,7 +230,7 @@ func (frame *logicalFrame) remove(line *Line) error {
 	return nil
 }
 
-func (frame *logicalFrame) clear() error {
+func (frame *logicalFrame) Clear() error {
 
 	if frame.header != nil {
 		frame.clearRows = append(frame.clearRows, frame.header.row)
@@ -226,14 +246,14 @@ func (frame *logicalFrame) clear() error {
 	return nil
 }
 
-func (frame *logicalFrame) close() error {
+func (frame *logicalFrame) Close() error {
 
 	// make screen realestate if the cursor is already near the bottom row (this preservers the users existing terminal output)
-	// if frame.isAtOrPastScreenBottom() {
+	// if frame.IsPastScreenBottom() {
 	// 	height := frame.visibleHeight()
-	// 	offset := frame.frameStartIdx - ((terminalHeight - height) + 1)
+	// 	offset := frame.topRow - ((terminalHeight - height) + 1)
 	// 	offset += 1 // we want to move one line past the frame
-	// 	frame.move(-offset)
+	// 	frame.Move(-offset)
 	// 	frame.rowAdvancements += offset
 	// }
 
@@ -262,9 +282,9 @@ func (frame *logicalFrame) close() error {
 	return nil
 }
 
-// todo: I think this should be decided by the user via a close() aciton, not by the indication of closed lines
+// todo: I think this should be decided by the user via a Close() aciton, not by the indication of closed lines
 // since you can always add another line... you don't know when an empty frame should remain open or not
-func (frame *logicalFrame) isClosed() bool {
+func (frame *logicalFrame) IsClosed() bool {
 	// if frame.header != nil {
 	// 	if !frame.header.closed {
 	// 		return false
@@ -286,11 +306,11 @@ func (frame *logicalFrame) isClosed() bool {
 	return frame.closed
 }
 
-func (frame *logicalFrame) move(rows int) {
-	frame.frameStartIdx += rows
+func (frame *logicalFrame) Move(rows int) {
+	frame.topRow += rows
 
 	// todo: instead of clearing all frame lines, only clear the ones affected
-	frame.clear()
+	frame.Clear()
 
 	// bump rows and redraw entire frame
 	if frame.header != nil {
@@ -305,7 +325,7 @@ func (frame *logicalFrame) move(rows int) {
 }
 
 // ensure that the frame is within the bounds of the terminal
-func (frame *logicalFrame) update() error {
+func (frame *logicalFrame) Update() error {
 	if frame.updateFn != nil {
 		err := frame.updateFn(frame)
 		if err != nil {
@@ -319,15 +339,15 @@ func (frame *logicalFrame) update() error {
 func (frame *logicalFrame) updateAndDraw() (errs []error)  {
 	errs = make([]error, 0)
 
-	err := frame.update()
+	err := frame.Update()
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	return append(errs, frame.draw()...)
+	return append(errs, frame.Draw()...)
 }
 
-func (frame *logicalFrame) draw() (errs []error) {
+func (frame *logicalFrame) Draw() (errs []error) {
 	errs = make([]error, 0)
 
 	// clear any marked lines (preserving the buffer) while these indexes still exist
@@ -343,7 +363,7 @@ func (frame *logicalFrame) draw() (errs []error) {
 	for idx := 0; idx < frame.rowAdvancements; idx++ {
 		advanceScreen(1)
 		if idx < len(frame.trailRows) {
-			writeAtRow(frame.trailRows[0], frame.frameStartIdx-len(frame.trailRows)+idx)
+			writeAtRow(frame.trailRows[0], frame.topRow-len(frame.trailRows)+idx)
 			if len(frame.trailRows) >= 1 {
 				frame.trailRows = frame.trailRows[1:]
 			} else {
@@ -355,7 +375,7 @@ func (frame *logicalFrame) draw() (errs []error) {
 
 	// append any remaining trail rows
 	for idx, message := range frame.trailRows {
-		writeAtRow(message, frame.frameStartIdx-len(frame.trailRows)+idx)
+		writeAtRow(message, frame.topRow-len(frame.trailRows)+idx)
 	}
 	frame.trailRows = make([]string, 0)
 
@@ -387,14 +407,14 @@ func (frame *logicalFrame) draw() (errs []error) {
 		}
 	}
 
-	if frame.isClosed() {
-		setCursorRow(frame.frameStartIdx + frame.height())
+	if frame.IsClosed() {
+		setCursorRow(frame.topRow + frame.Height())
 	}
 
 	return errs
 }
 
-func (frame *logicalFrame) wait() {
+func (frame *logicalFrame) Wait() {
 	frame.closeSignal.Wait()
-	// setCursorRow(frame.frameStartIdx + frame.height())
+	// setCursorRow(frame.topRow + frame.height())
 }

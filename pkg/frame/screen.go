@@ -1,4 +1,4 @@
-package jotframe
+package frame
 
 import (
 	"bufio"
@@ -17,7 +17,7 @@ var (
 	screenLock *sync.Mutex
 )
 
-func NewScreenEvent(line *Line) *ScreenEvent {
+func newScreenEvent(line *Line) *ScreenEvent {
 	e := &ScreenEvent{
 		row: line.row,
 		value: make([]byte, len(line.buffer)),
@@ -26,6 +26,7 @@ func NewScreenEvent(line *Line) *ScreenEvent {
 	return e
 }
 
+// TODO: this should be a ScreenEvent!
 func advanceScreen(rows int) {
 	setCursorRow(terminalHeight)
 	fmt.Print(strings.Repeat("\n", rows))
@@ -40,6 +41,7 @@ func clearScreen() {
 	fmt.Print("\x1b[2J")
 }
 
+// TODO: this should be a ScreenEvent!
 func clearRow(row int) error {
 	err := setCursorRow(row)
 	if err != nil {
