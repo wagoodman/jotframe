@@ -93,7 +93,7 @@ func (frame *logicalFrame) IsPastScreenBottom() bool {
 	futureFrameStartIdx := frame.topRow - frame.rowAdvancements
 
 	// if the frame has moved past the bottom of the screen, move it up a bit
-	if futureFrameStartIdx + height > terminalHeight {
+	if futureFrameStartIdx+height > terminalHeight {
 		return true
 	}
 	return false
@@ -336,7 +336,7 @@ func (frame *logicalFrame) Update() error {
 	return nil
 }
 
-func (frame *logicalFrame) updateAndDraw() (errs []error)  {
+func (frame *logicalFrame) updateAndDraw() (errs []error) {
 	errs = make([]error, 0)
 
 	err := frame.Update()

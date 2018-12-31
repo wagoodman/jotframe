@@ -4,9 +4,9 @@ func newFreeFrame(config Config) *floatingFrame {
 
 	innerFrame := newLogicalFrame(config)
 	frame := &floatingFrame{
-		logicalFrame:  innerFrame,
-		lock:          getScreenLock(),
-		config: config,
+		logicalFrame: innerFrame,
+		lock:         getScreenLock(),
+		config:       config,
 	}
 	frame.logicalFrame.updateFn = nil
 
@@ -20,7 +20,6 @@ func newFreeFrame(config Config) *floatingFrame {
 func (frame *floatingFrame) Config() Config {
 	return frame.config
 }
-
 
 func (frame *floatingFrame) StartIdx() int {
 	return frame.logicalFrame.StartIdx()

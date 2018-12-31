@@ -11,9 +11,9 @@ func newBottomFrame(config Config) *bottomFrame {
 
 	innerFrame := newLogicalFrame(config)
 	frame := &bottomFrame{
-		logicalFrame:  innerFrame,
-		lock:          getScreenLock(),
-		config: config,
+		logicalFrame: innerFrame,
+		lock:         getScreenLock(),
+		config:       config,
 	}
 	frame.logicalFrame.updateFn = frame.update
 

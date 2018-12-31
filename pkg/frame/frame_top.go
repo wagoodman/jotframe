@@ -34,7 +34,6 @@ func (frame *topFrame) StartIdx() int {
 	return frame.logicalFrame.StartIdx()
 }
 
-
 func (frame *topFrame) Height() int {
 	return frame.logicalFrame.Height()
 }
@@ -100,11 +99,9 @@ func (frame *topFrame) Clear() error {
 	return frame.logicalFrame.Clear()
 }
 
-
 func (frame *topFrame) IsClosed() bool {
 	return frame.logicalFrame.IsClosed()
 }
-
 
 func (frame *topFrame) Wait() {
 	frame.logicalFrame.Wait()

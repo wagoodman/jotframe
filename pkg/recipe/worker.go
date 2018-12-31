@@ -30,9 +30,9 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 
 func (wq *WorkQueue) Work() {
 	frames := frame.Factory(frame.Config{
-		Lines: 0,
-		HasHeader: false,
-		HasFooter: false,
+		Lines:         0,
+		HasHeader:     false,
+		HasFooter:     false,
 		TrailOnRemove: true,
 	})
 	fr := frames[0]

@@ -17,7 +17,7 @@ func (float FloatRule) String() string {
 	}
 }
 
-func Factory(configs... Config) []Frame {
+func Factory(configs ...Config) []Frame {
 	frames := make([]Frame, 0)
 
 	// todo: check config continuity/validity

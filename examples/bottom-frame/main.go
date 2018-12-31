@@ -35,10 +35,10 @@ func main() {
 	rand.Seed(time.Now().Unix())
 
 	config := frame.Config{
-		Lines: 5,
-		Float: frame.FloatBottom,
-		HasHeader: true,
-		HasFooter: true,
+		Lines:         5,
+		Float:         frame.FloatBottom,
+		HasHeader:     true,
+		HasFooter:     true,
 		TrailOnRemove: true,
 	}
 	frames := frame.Factory(config)

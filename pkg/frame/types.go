@@ -66,7 +66,6 @@ type Line struct {
 	stale       bool
 }
 
-
 type logicalFrame struct {
 	config Config
 

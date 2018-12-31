@@ -4,7 +4,7 @@ var (
 	terminalWidth  int
 	terminalHeight int
 	allFrames      = make([]Frame, 0)
-	screenHandlers = make([]ScreenEventHandler,0)
+	screenHandlers = make([]ScreenEventHandler, 0)
 )
 
 func registerFrame(frame Frame) {

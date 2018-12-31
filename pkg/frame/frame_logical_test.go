@@ -34,10 +34,10 @@ func Test_NewLogicalFrame(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.rows,
+			Lines:     table.rows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 
 		// verify the header
@@ -107,10 +107,10 @@ func Test_LogicalFrame_Height(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.rows,
+			Lines:     table.rows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: 10,
+			startRow:  10,
 		})
 		actualHeight := frame.Height()
 		if table.expectedHeight != actualHeight {
@@ -139,10 +139,10 @@ func Test_LogicalFrame_IsAtOrPastScreenBottom(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: frameRows,
+			Lines:     frameRows,
 			HasHeader: false,
 			HasFooter: false,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		actualResult := frame.IsPastScreenBottom()
 		if table.isAtBottom != actualResult {
@@ -175,10 +175,10 @@ func Test_LogicalFrame_Append(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: 0,
+			Lines:     0,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 
 		// append rows...
@@ -242,10 +242,10 @@ func Test_LogicalFrame_Prepend(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: 0,
+			Lines:     0,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 
 		// append rows...
@@ -305,10 +305,10 @@ func Test_LogicalFrame_Insert(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: 4,
+			Lines:     4,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		finalRows := 5
 		insertIdx := 2
@@ -365,10 +365,10 @@ func Test_LogicalFrame_Remove(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.startRows,
+			Lines:     table.startRows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		rmIdx := 2
 
@@ -428,10 +428,10 @@ func Test_LogicalFrame_Clear(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.startRows,
+			Lines:     table.startRows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		err := frame.Clear()
 		if err != nil {
@@ -478,10 +478,10 @@ func Test_LogicalFrame_Close(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.startRows,
+			Lines:     table.startRows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		err := frame.Close()
 		if err != nil {
@@ -524,10 +524,10 @@ func Test_LogicalFrame_Move(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: table.startRows,
+			Lines:     table.startRows,
 			HasHeader: table.hasHeader,
 			HasFooter: table.hasFooter,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		frame.Move(table.moveRows)
 
@@ -570,9 +570,9 @@ func Test_LogicalFrame_Update(t *testing.T) {
 	terminalHeight = 100
 	frameRows := 10
 
-	fn := func (frame *logicalFrame) error {
+	fn := func(frame *logicalFrame) error {
 		// if the frame has moved past the bottom of the screen, move it up a bit
-		if frame.IsPastScreenBottom()  {
+		if frame.IsPastScreenBottom() {
 			frameHeight := frame.visibleHeight()
 			// offset is how many rows the frame needs to be adjusted to fit on the screen.
 			// This is the same as how many rows past the edge of the screen this frame currently is.
@@ -609,10 +609,10 @@ func Test_LogicalFrame_Update(t *testing.T) {
 
 	for _, table := range tables {
 		frame := newLogicalFrame(Config{
-			Lines: frameRows,
+			Lines:     frameRows,
 			HasHeader: false,
 			HasFooter: false,
-			startRow: table.destinationRow,
+			startRow:  table.destinationRow,
 		})
 		frame.updateFn = fn
 		frame.Update()
@@ -624,7 +624,7 @@ func Test_LogicalFrame_Update(t *testing.T) {
 
 }
 
-var drawTestCases = map[string]drawTestParams {
+var drawTestCases = map[string]drawTestParams{
 	"goCase": {3, false, false, 10, 40,
 		[]ScreenEvent{
 			{row: 10, value: []byte("LineIdx:0")},
@@ -756,10 +756,10 @@ func Test_LogicalFrame_Draw(t *testing.T) {
 			// run test...
 			var errs []error
 			frame := newLogicalFrame(Config{
-				Lines: table.rows,
+				Lines:     table.rows,
 				HasHeader: table.hasHeader,
 				HasFooter: table.hasFooter,
-				startRow: table.startRow,
+				startRow:  table.startRow,
 			})
 			if table.hasHeader {
 				frame.header.buffer = []byte("theHeader")
@@ -794,10 +794,10 @@ func Test_LogicalFrame_AdhocDraw(t *testing.T) {
 			var err error
 			var errs = make([]error, 0)
 			frame := newLogicalFrame(Config{
-				Lines: table.rows,
+				Lines:     table.rows,
 				HasHeader: table.hasHeader,
 				HasFooter: table.hasFooter,
-				startRow: table.startRow,
+				startRow:  table.startRow,
 			})
 			if table.hasHeader {
 				err = frame.header.WriteString("theHeader")
@@ -839,10 +839,10 @@ func Test_LogicalFrame_UpdateDraw(t *testing.T) {
 			// run test...
 			var errs []error
 			frame := newLogicalFrame(Config{
-				Lines: table.rows,
+				Lines:     table.rows,
 				HasHeader: table.hasHeader,
 				HasFooter: table.hasFooter,
-				startRow: table.startRow,
+				startRow:  table.startRow,
 			})
 			if table.hasHeader {
 				frame.header.buffer = []byte("theHeader")
