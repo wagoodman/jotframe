@@ -1,4 +1,4 @@
-package jotframe
+package frame
 
 import (
 	"sync"
@@ -57,11 +57,11 @@ func Test_Line_move(t *testing.T) {
 		actualResult := line.row
 
 		if expectedResult != actualResult {
-			t.Errorf("Line.move(): expected row '%d', but got row '%d'", expectedResult, actualResult)
+			t.Errorf("Line.Move(): expected row '%d', but got row '%d'", expectedResult, actualResult)
 		}
 
 		// if !line.stale {
-		// 	t.Errorf("Line.move(): expected line %d to be stale, but was not", line.row)
+		// 	t.Errorf("Line.Move(): expected line %d to be stale, but was not", line.row)
 		// }
 	}
 

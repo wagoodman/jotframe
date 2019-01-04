@@ -1,4 +1,4 @@
-package jotframe
+package frame
 
 import (
 	"os"

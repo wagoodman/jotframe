@@ -1,4 +1,4 @@
-package jotframe
+package frame
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func (line *Line) notify() {
 	if len(screenHandlers) == 0 {
 		return
 	}
-	event := NewScreenEvent(line)
+	event := newScreenEvent(line)
 	for _, handler := range screenHandlers {
 		handler.onEvent(event)
 	}

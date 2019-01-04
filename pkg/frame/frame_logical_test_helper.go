@@ -1,4 +1,4 @@
-package jotframe
+package frame
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ type TestEventHandler struct {
 
 func NewTestEventHandler(t *testing.T) *TestEventHandler {
 	return &TestEventHandler{
-		t: t,
+		t:      t,
 		events: make([]*ScreenEvent, 0),
 	}
 }
@@ -43,7 +43,6 @@ type drawTestParams struct {
 	events         []ScreenEvent
 	errors         []string
 }
-
 
 func validateEvents(t *testing.T, test string, table drawTestParams, errs []error, frame *logicalFrame, handler *TestEventHandler) {
 
@@ -88,5 +87,3 @@ func validateEvents(t *testing.T, test string, table drawTestParams, errs []erro
 		t.Fatal("Stopping test")
 	}
 }
-
-

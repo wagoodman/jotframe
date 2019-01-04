@@ -3,13 +3,14 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/wagoodman/jotframe/pkg/frame"
+	"github.com/wagoodman/jotframe/pkg/recipe"
 	"io"
 	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/k0kubun/go-ansi"
-	"github.com/wagoodman/jotframe"
 )
 
 // TODO: The worker wrapper object should take the following:
@@ -53,13 +54,13 @@ func (item Resource) String() string {
 }
 
 // TODO: use this to actually update the footer
-func footerProcessor(line *jotframe.Line) {
+func footerProcessor(line *frame.Line) {
 
 	// This function reads from a channel... items come in when worker tasks have been completed
 	// We then update the footer
 }
 
-func (item Resource) Work(line *jotframe.Line) {
+func (item Resource) Work(line *frame.Line) {
 	minMs := 10
 	maxMs := 100
 
@@ -109,7 +110,7 @@ func main() {
 		{"counter-strike", 4202, 0},
 	}
 
-	wq := jotframe.NewWorkQueue(maxConcurrent)
+	wq := recipe.NewWorkQueue(maxConcurrent)
 	for _, item := range downloads {
 		wq.AddWork(item)
 	}

@@ -1,7 +1,8 @@
-package jotframe
+package recipe
 
 import (
 	"context"
+	"github.com/wagoodman/jotframe/pkg/frame"
 
 	"github.com/k0kubun/go-ansi"
 	"golang.org/x/sync/semaphore"
@@ -9,7 +10,7 @@ import (
 
 // Worker is working
 type Worker interface {
-	Work(*Line)
+	Work(*frame.Line)
 }
 
 type WorkQueue struct {
@@ -28,7 +29,13 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 }
 
 func (wq *WorkQueue) Work() {
-	frame := NewFixedFrame(0, false, false, true)
+	frames := frame.Factory(frame.Config{
+		Lines:         0,
+		HasHeader:     false,
+		HasFooter:     false,
+		TrailOnRemove: true,
+	})
+	fr := frames[0]
 	// worker pool
 	ctx := context.TODO()
 	sem := semaphore.NewWeighted(wq.maxConcurrent)
@@ -36,18 +43,18 @@ func (wq *WorkQueue) Work() {
 	for _, item := range wq.queue {
 		worker, _ := item.(Worker)
 		sem.Acquire(ctx, 1)
-		line, _ := frame.Append()
-		jotFunc := func(userFunc func(line *Line), line *Line) {
+		line, _ := fr.Append()
+		jotFunc := func(userFunc func(line *frame.Line), line *frame.Line) {
 			defer sem.Release(1)
 
 			userFunc(line)
-			frame.Remove(line)
+			fr.Remove(line)
 		}
 		go jotFunc(worker.Work, line)
 	}
 
-	frame.Wait()
-	frame.Close()
+	fr.Wait()
+	fr.Close()
 
 	ansi.CursorShow()
 }
