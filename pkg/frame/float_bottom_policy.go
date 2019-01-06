@@ -69,7 +69,6 @@ func (policy *floatBottomPolicy) allowedMotion(rows int) int {
 	return 0
 }
 
-
 func (policy *floatBottomPolicy) allowTrail() bool {
 	return true
 }

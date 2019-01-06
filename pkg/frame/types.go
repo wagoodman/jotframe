@@ -10,10 +10,10 @@ import (
 type PositionPolicy int
 
 const (
-	FloatFree PositionPolicy = iota // allowed to go anyway, even off the screen
-	FloatForward // similar to free, except once it hits the bottom, it does not go off the screen (it makes more realestate)
-	FloatTop // top fixed
-	FloatBottom // bottom fixed
+	FloatFree    PositionPolicy = iota // allowed to go anyway, even off the screen
+	FloatForward                       // similar to free, except once it hits the bottom, it does not go off the screen (it makes more realestate)
+	FloatTop                           // top fixed
+	FloatBottom                        // bottom fixed
 )
 
 func (float PositionPolicy) String() string {
@@ -75,7 +75,7 @@ type Line struct {
 
 type Frame struct {
 	config Config
-	lock         *sync.Mutex
+	lock   *sync.Mutex
 
 	header          *Line
 	activeLines     []*Line
@@ -91,7 +91,6 @@ type Frame struct {
 	closed      bool
 	stale       bool
 }
-
 
 type floatTopPolicy struct {
 	Frame *Frame

@@ -14,7 +14,7 @@ func (policy *floatTopPolicy) onInit() {
 	if err != nil {
 		return
 	}
-	policy.Frame.rowAdvancements = offset-1
+	policy.Frame.rowAdvancements = offset - 1
 }
 
 // reactive action!
@@ -39,8 +39,6 @@ func (policy *floatTopPolicy) allowedMotion(rows int) int {
 	return 0
 }
 
-
 func (policy *floatTopPolicy) allowTrail() bool {
 	return false
 }
-

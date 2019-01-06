@@ -34,10 +34,10 @@ func Test_NewFrame(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.rows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          table.rows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 
@@ -110,10 +110,10 @@ func Test_Frame_Height(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.rows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  10,
+				Lines:          table.rows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       10,
 				PositionPolicy: FloatFree,
 			})
 			actualHeight := frame.Height()
@@ -145,10 +145,10 @@ func Test_Frame_IsAtOrPastScreenBottom(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     frameRows,
-				HasHeader: false,
-				HasFooter: false,
-				startRow:  table.destinationRow,
+				Lines:          frameRows,
+				HasHeader:      false,
+				HasFooter:      false,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 			actualResult := frame.IsPastScreenBottom()
@@ -184,10 +184,10 @@ func Test_Frame_Append(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     0,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          0,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 
@@ -254,10 +254,10 @@ func Test_Frame_Prepend(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     0,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          0,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 
@@ -320,10 +320,10 @@ func Test_Frame_Insert(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     4,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          4,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 			finalRows := 5
@@ -383,10 +383,10 @@ func Test_Frame_Remove(t *testing.T) {
 	for _, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.startRows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          table.startRows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 			rmIdx := 2
@@ -440,21 +440,20 @@ func Test_Frame_Clear(t *testing.T) {
 		destinationRow    int
 		expectedClearRows []int
 	}{
-		"goCase": {5, false, false, 10, []int{10, 11, 12, 13, 14}},
-		"Header": {5, true, false, 10, []int{10, 11, 12, 13, 14, 15}},
-		"Footer": {5, false, true, 10, []int{10, 11, 12, 13, 14, 15}},
+		"goCase":        {5, false, false, 10, []int{10, 11, 12, 13, 14}},
+		"Header":        {5, true, false, 10, []int{10, 11, 12, 13, 14, 15}},
+		"Footer":        {5, false, true, 10, []int{10, 11, 12, 13, 14, 15}},
 		"Header+Footer": {5, true, true, 10, []int{10, 11, 12, 13, 14, 15, 16}},
 	}
 
 	for test, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.startRows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          table.startRows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
-
 			})
 			frame.clear()
 
@@ -490,19 +489,19 @@ func Test_Frame_Close(t *testing.T) {
 		hasFooter      bool
 		destinationRow int
 	}{
-		"goCase": {5, false, false, 10},
-		"Header": {5, true, false, 10},
-		"Footer": {5, false, true, 10},
+		"goCase":        {5, false, false, 10},
+		"Header":        {5, true, false, 10},
+		"Footer":        {5, false, true, 10},
 		"Header+Footer": {5, true, true, 10},
 	}
 
 	for test, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.startRows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          table.startRows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 			frame.Close()
@@ -536,19 +535,19 @@ func Test_Frame_Move(t *testing.T) {
 		destinationRow int
 		moveRows       int
 	}{
-		"goCase": {5, false, false, 10, 5},
-		"Header": {5, true, false, 10, -5},
-		"Footer": {5, false, true, 10, 5},
+		"goCase":        {5, false, false, 10, 5},
+		"Header":        {5, true, false, 10, -5},
+		"Footer":        {5, false, true, 10, 5},
 		"Header+Footer": {5, true, true, 10, -5},
 	}
 
 	for test, table := range tables {
 		suppressOutput(func() {
 			frame := New(Config{
-				Lines:     table.startRows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.destinationRow,
+				Lines:          table.startRows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.destinationRow,
 				PositionPolicy: FloatFree,
 			})
 			frame.Move(table.moveRows)

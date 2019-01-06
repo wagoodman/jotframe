@@ -22,8 +22,8 @@ func (policy *floatForwardPolicy) onInit() {
 	adjustment := policy.Frame.config.Height() - policy.Frame.config.VisibleHeight()
 
 	// lets not pass the top of the screen by default
-	if policy.Frame.topRow - adjustment-1 < 0 {
-		adjustment += policy.Frame.topRow - adjustment-1
+	if policy.Frame.topRow-adjustment-1 < 0 {
+		adjustment += policy.Frame.topRow - adjustment - 1
 	}
 
 	policy.Frame.topRow -= adjustment
@@ -56,7 +56,6 @@ func (policy *floatForwardPolicy) onTrail() {
 func (policy *floatForwardPolicy) allowedMotion(rows int) int {
 	return rows
 }
-
 
 func (policy *floatForwardPolicy) allowTrail() bool {
 	return true

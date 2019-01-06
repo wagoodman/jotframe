@@ -204,10 +204,10 @@ func Test_FloatForwardPolicy_Frame_Draw(t *testing.T) {
 			// run test...
 			var errs []error
 			frame := New(Config{
-				Lines:     table.rows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.startRow,
+				Lines:          table.rows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.startRow,
 				PositionPolicy: table.policy,
 			})
 			if table.hasHeader {
@@ -249,10 +249,10 @@ func Test_FloatForwardPolicy_Frame_AdhocDraw(t *testing.T) {
 			var err error
 			var errs = make([]error, 0)
 			frame := New(Config{
-				Lines:     table.rows,
-				HasHeader: table.hasHeader,
-				HasFooter: table.hasFooter,
-				startRow:  table.startRow,
+				Lines:          table.rows,
+				HasHeader:      table.hasHeader,
+				HasFooter:      table.hasFooter,
+				startRow:       table.startRow,
 				PositionPolicy: table.policy,
 			})
 			if table.hasHeader {
@@ -281,4 +281,3 @@ func Test_FloatForwardPolicy_Frame_AdhocDraw(t *testing.T) {
 	}
 
 }
-

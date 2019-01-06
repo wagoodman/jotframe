@@ -59,7 +59,7 @@ func New(config Config) *Frame {
 	return frame
 }
 
-func (frame *Frame) SetAutoDraw(enabled bool){
+func (frame *Frame) SetAutoDraw(enabled bool) {
 	frame.autoDraw = enabled
 }
 
@@ -82,7 +82,6 @@ func (frame *Frame) Footer() *Line {
 func (frame *Frame) StartIdx() int {
 	return frame.topRow
 }
-
 
 func (frame *Frame) AppendTrail(str string) {
 	frame.lock.Lock()
@@ -113,7 +112,7 @@ func (frame *Frame) Height() int {
 
 func (frame *Frame) visibleHeight() int {
 	height := frame.Height()
-	forwardDrawArea := terminalHeight - (frame.topRow-1)
+	forwardDrawArea := terminalHeight - (frame.topRow - 1)
 
 	if height > forwardDrawArea {
 		return forwardDrawArea
@@ -342,7 +341,6 @@ func (frame *Frame) clear() {
 		frame.clearRows = append(frame.clearRows, frame.footer.row)
 	}
 }
-
 
 func (frame *Frame) Close() {
 	frame.lock.Lock()

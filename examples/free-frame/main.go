@@ -24,12 +24,12 @@ func main() {
 
 	totalLines := 10
 	config := frame.Config{
-		Lines:         0, //totalLines,
-		HasHeader:     true,
-		HasFooter:     true,
-		TrailOnRemove: true,
+		Lines:          0, //totalLines,
+		HasHeader:      true,
+		HasFooter:      true,
+		TrailOnRemove:  true,
 		PositionPolicy: frame.FloatFree,
-		ManualDraw:    false,
+		ManualDraw:     false,
 	}
 	fr := frame.New(config)
 
@@ -46,7 +46,7 @@ func main() {
 		// go renderLine(idx, fr.Lines()[idx], fr)
 		go renderLine(idx, line, fr)
 	}
-	time.Sleep(time.Duration(10*time.Second))
+	time.Sleep(time.Duration(10 * time.Second))
 
 	// close the frame
 	fr.Wait()

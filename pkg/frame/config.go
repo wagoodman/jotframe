@@ -2,7 +2,7 @@ package frame
 
 func (config *Config) VisibleHeight() int {
 	height := config.Height()
-	forwardDrawAreaHeight := terminalHeight - (config.startRow-1)
+	forwardDrawAreaHeight := terminalHeight - (config.startRow - 1)
 
 	if height > forwardDrawAreaHeight {
 		return forwardDrawAreaHeight
