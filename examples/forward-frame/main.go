@@ -28,7 +28,7 @@ func main() {
 		HasHeader:     true,
 		HasFooter:     true,
 		TrailOnRemove: true,
-		PositionPolicy: frame.FloatFree,
+		PositionPolicy: frame.FloatForward,
 		ManualDraw:    false,
 	}
 	fr := frame.New(config)

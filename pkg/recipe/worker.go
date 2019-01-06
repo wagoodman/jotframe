@@ -29,13 +29,22 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 }
 
 func (wq *WorkQueue) Work() {
-	frames := frame.Factory(frame.Config{
+	fr := frame.New(frame.Config{
 		Lines:         0,
-		HasHeader:     false,
-		HasFooter:     false,
+		HasHeader:     true,
+		HasFooter:     true,
 		TrailOnRemove: true,
+		PositionPolicy: frame.FloatFree,
+		ManualDraw:    false,
 	})
-	fr := frames[0]
+
+	fr.Header().WriteString("This is the best header ever!")
+	fr.Header().Close()
+
+	fr.Footer().WriteString("...Followed by the best footer ever...")
+	fr.Footer().Close()
+
+
 	// worker pool
 	ctx := context.TODO()
 	sem := semaphore.NewWeighted(wq.maxConcurrent)
@@ -46,7 +55,6 @@ func (wq *WorkQueue) Work() {
 		line, _ := fr.Append()
 		jotFunc := func(userFunc func(line *frame.Line), line *frame.Line) {
 			defer sem.Release(1)
-
 			userFunc(line)
 			fr.Remove(line)
 		}

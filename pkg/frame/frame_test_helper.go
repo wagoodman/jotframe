@@ -39,12 +39,13 @@ type drawTestParams struct {
 	hasHeader      bool
 	hasFooter      bool
 	startRow       int
+	policy         PositionPolicy
 	terminalHeight int
 	events         []ScreenEvent
 	errors         []string
 }
 
-func validateEvents(t *testing.T, test string, table drawTestParams, errs []error, frame *logicalFrame, handler *TestEventHandler) {
+func validateEvents(t *testing.T, test string, table drawTestParams, errs []error, frame *Frame, handler *TestEventHandler) {
 
 	if len(frame.activeLines) != table.rows {
 		t.Errorf("[case=%s] expected %d rows, got %d", test, table.rows, len(frame.activeLines))
