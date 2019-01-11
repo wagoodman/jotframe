@@ -31,19 +31,13 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 func (wq *WorkQueue) Work() {
 	fr := frame.New(frame.Config{
 		Lines:          0,
-		HasHeader:      true,
-		HasFooter:      true,
+		HasHeader:      false,
+		HasFooter:      false,
 		TrailOnRemove:  true,
 		PositionPolicy: frame.FloatFree,
 		ManualDraw:     false,
 	})
-
-	fr.Header().WriteString("This is the best header ever!")
-	fr.Header().Close()
-
-	fr.Footer().WriteString("...Followed by the best footer ever...")
-	fr.Footer().Close()
-
+	
 	// worker pool
 	ctx := context.TODO()
 	sem := semaphore.NewWeighted(wq.maxConcurrent)
