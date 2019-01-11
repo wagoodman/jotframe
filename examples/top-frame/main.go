@@ -36,7 +36,7 @@ func main() {
 
 	config := frame.Config{
 		Lines:          5,
-		PositionPolicy: frame.FloatBottom,
+		PositionPolicy: frame.FloatTop,
 		HasHeader:      true,
 		HasFooter:      true,
 		TrailOnRemove:  true,

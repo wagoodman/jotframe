@@ -39,7 +39,8 @@ func pollSignals() {
 			terminalWidth, terminalHeight = getTerminalSize()
 			lock := getScreenLock()
 			lock.Lock()
-			clearScreen()
+			// the screen may have a trail, which is unmanaged at this point. Don't clear the screen
+			// clearScreen()
 			refresh()
 			lock.Unlock()
 		}

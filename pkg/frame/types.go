@@ -1,54 +1,61 @@
 package frame
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
 )
 
-type FloatRule int
+type PositionPolicy int
 
 const (
-	FloatFree FloatRule = iota
-	FloatTop
-	FloatBottom
+	FloatFree    PositionPolicy = iota // allowed to go anyway, even off the screen
+	FloatForward                       // similar to free, except once it hits the bottom, it does not go off the screen (it makes more realestate)
+	FloatTop                           // top fixed
+	FloatBottom                        // bottom fixed
 )
+
+func (float PositionPolicy) String() string {
+	switch float {
+	case FloatFree:
+		return "FloatFree"
+	case FloatForward:
+		return "FloatForward"
+	case FloatTop:
+		return "FloatTop"
+	case FloatBottom:
+		return "FloatBottom"
+	default:
+		return fmt.Sprintf("PositionPolicy=%d?", float)
+	}
+}
 
 type ScreenEventHandler interface {
 	onEvent(*ScreenEvent)
 }
 
-type Frame interface {
-	StartIdx() int
-	Config() Config
-	Height() int
+type Policy interface {
+	// reactive actions
+	// onClose()
+	onResize(adjustment int)
+	// onUpdate()
+	onTrail()
 
-	Header() *Line
-	Footer() *Line
-	Lines() []*Line
-	Append() (*Line, error)
-	Prepend() (*Line, error)
-	Insert(index int) (*Line, error)
-	Remove(line *Line) error
-	Move(rows int)
-
-	Clear() error
-	Close() error
-	IsClosed() bool
-
-	Update() error
-	Draw() []error
-
-	Wait()
+	// proactive actions
+	onInit()
+	allowedMotion(rows int) int
+	allowTrail() bool
 }
 
 type Config struct {
-	Lines         int
-	startRow      int
-	HasHeader     bool
-	HasFooter     bool
-	TrailOnRemove bool
-	Float         FloatRule
+	Lines          int
+	startRow       int
+	HasHeader      bool
+	HasFooter      bool
+	TrailOnRemove  bool
+	PositionPolicy PositionPolicy
+	ManualDraw     bool
 }
 
 type ScreenEvent struct {
@@ -66,8 +73,9 @@ type Line struct {
 	stale       bool
 }
 
-type logicalFrame struct {
+type Frame struct {
 	config Config
+	lock   *sync.Mutex
 
 	header          *Line
 	activeLines     []*Line
@@ -76,27 +84,26 @@ type logicalFrame struct {
 	rowAdvancements int
 	footer          *Line
 
+	policy      Policy
+	autoDraw    bool
 	topRow      int
 	closeSignal *sync.WaitGroup
-	updateFn    func(*logicalFrame) error
 	closed      bool
 	stale       bool
 }
 
-type topFrame struct {
-	logicalFrame *logicalFrame
-	lock         *sync.Mutex
-	config       Config
+type floatTopPolicy struct {
+	Frame *Frame
 }
 
-type bottomFrame struct {
-	logicalFrame *logicalFrame
-	lock         *sync.Mutex
-	config       Config
+type floatBottomPolicy struct {
+	Frame *Frame
 }
 
-type floatingFrame struct {
-	logicalFrame *logicalFrame
-	lock         *sync.Mutex
-	config       Config
+type floatFreePolicy struct {
+	Frame *Frame
+}
+
+type floatForwardPolicy struct {
+	Frame *Frame
 }

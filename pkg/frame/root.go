@@ -3,11 +3,11 @@ package frame
 var (
 	terminalWidth  int
 	terminalHeight int
-	allFrames      = make([]Frame, 0)
+	allFrames      = make([]*Frame, 0)
 	screenHandlers = make([]ScreenEventHandler, 0)
 )
 
-func registerFrame(frame Frame) {
+func registerFrame(frame *Frame) {
 	allFrames = append(allFrames, frame)
 }
 
@@ -33,9 +33,9 @@ func Refresh() error {
 func refresh() error {
 	for _, frame := range allFrames {
 		if !frame.IsClosed() {
-			frame.Clear()
-			frame.Update()
-			frame.Draw()
+			frame.clear()
+			// frame.update()
+			frame.draw()
 		}
 	}
 	return nil
@@ -47,10 +47,13 @@ func Close() error {
 	defer lock.Unlock()
 
 	for _, frame := range allFrames {
-		err := frame.Close()
-		if err != nil {
-			return err
-		}
+		frame.close()
 	}
+	// allow the frames to exist as a trail now. Advance the screen to allow room for the cursor.
+	row, _ := GetCursorRow()
+	if row == terminalHeight {
+		advanceScreen(1)
+	}
+
 	return nil
 }
