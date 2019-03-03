@@ -27,6 +27,7 @@ notifications:
   email: false
 
 before_script:
+- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install make ; fi
 - go get ./...
 
 # Note: scripts always run to completion
