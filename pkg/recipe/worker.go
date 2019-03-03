@@ -2,6 +2,7 @@ package recipe
 
 import (
 	"context"
+
 	"github.com/wagoodman/jotframe/pkg/frame"
 
 	"github.com/k0kubun/go-ansi"
@@ -34,10 +35,10 @@ func (wq *WorkQueue) Work() {
 		HasHeader:      false,
 		HasFooter:      false,
 		TrailOnRemove:  true,
-		PositionPolicy: frame.FloatFree,
+		PositionPolicy: frame.FloatForward,
 		ManualDraw:     false,
 	})
-	
+
 	// worker pool
 	ctx := context.TODO()
 	sem := semaphore.NewWeighted(wq.maxConcurrent)

@@ -1,10 +1,12 @@
+// +build !windows
+
 package frame
 
 import (
+	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"os/signal"
 	"syscall"
-	"unsafe"
 )
 
 var (
@@ -23,9 +25,8 @@ func GetTerminalSize() (int, int) {
 }
 
 func getTerminalSize() (int, int) {
-	var obj terminalSize
-	_, _, _ = syscall.Syscall(syscall.SYS_IOCTL, os.Stdout.Fd(), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(&obj)))
-	return int(obj.cols), int(obj.rows)
+	termWidth, termHeight, _ := terminal.GetSize(int(os.Stdout.Fd()))
+	return termWidth, termHeight
 }
 
 func pollSignals() {

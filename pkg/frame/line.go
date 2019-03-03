@@ -109,7 +109,7 @@ func (line *Line) Write(buff []byte) (int, error) {
 }
 
 func (line *Line) write(buff []byte) (int, error) {
-	line.buffer = []byte(strings.Split(string(buff), "\n")[0])
+	line.buffer = []byte(strings.Split(string(buff), lineBreak)[0])
 
 	if line.row < 0 || line.row > terminalHeight {
 		return -1, fmt.Errorf("line is out of bounds (row=%d)", line.row)
