@@ -28,7 +28,6 @@ func (policy *floatForwardPolicy) onInit() {
 
 	policy.Frame.topRow -= adjustment
 	policy.Frame.rowAdvancements += adjustment
-
 }
 
 // reactive action!

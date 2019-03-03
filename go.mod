@@ -1,11 +1,13 @@
 module github.com/wagoodman/jotframe
 
 require (
-	github.com/google/uuid v1.0.0
+	github.com/google/uuid v1.1.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
-	github.com/mattn/go-isatty v0.0.4
-	github.com/sirupsen/logrus v1.2.0
-	golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869
-	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
-	golang.org/x/sys v0.0.0-20181116161606-93218def8b18 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/mattn/go-isatty v0.0.6
+	github.com/sirupsen/logrus v1.3.0
+	github.com/stretchr/testify v1.3.0 // indirect
+	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25
+	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+	golang.org/x/sys v0.0.0-20190302025703-b6889370fb10 // indirect
 )
