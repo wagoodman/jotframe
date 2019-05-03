@@ -35,7 +35,7 @@ func (wq *WorkQueue) Work() {
 		HasHeader:      false,
 		HasFooter:      false,
 		TrailOnRemove:  true,
-		PositionPolicy: frame.FloatForward,
+		PositionPolicy: frame.PolicyFloatForwardTrail,
 		ManualDraw:     false,
 	})
 

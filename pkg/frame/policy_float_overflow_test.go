@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-var floatForwardDrawTestCases = map[string]drawTestParams{
-	"FloatForward_goCase": {3, false, false, 10, FloatForward, 40,
+var floatFreeDrawTestCases = map[string]drawTestParams{
+	"FloatFree_goCase": {3, false, false, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -20,7 +20,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatForward_Header": {3, true, false, 10, FloatForward, 40,
+	"FloatFree_Header": {3, true, false, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -35,7 +35,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatForward_Footer": {3, false, true, 10, FloatForward, 40,
+	"FloatFree_Footer": {3, false, true, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -50,7 +50,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatForward_HeaderFooter": {3, true, true, 10, FloatForward, 40,
+	"FloatFree_HeaderFooter": {3, true, true, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -67,7 +67,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatForward_TermHeightSmall_AtTop": {3, false, false, 1, FloatForward, 2,
+	"FloatFree_TermHeightSmall_AtTop": {3, false, false, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -80,7 +80,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=3)",
 		},
 	},
-	"FloatForward_TermHeightSmall_AtTop_Header": {3, true, false, 1, FloatForward, 2,
+	"FloatFree_TermHeightSmall_AtTop_Header": {3, true, false, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -94,7 +94,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatForward_TermHeightSmall_AtTop_Footer": {3, false, true, 1, FloatForward, 2,
+	"FloatFree_TermHeightSmall_AtTop_Footer": {3, false, true, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -108,7 +108,7 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatForward_TermHeightSmall_AtTop_HeaderFooter": {3, true, true, 1, FloatForward, 2,
+	"FloatFree_TermHeightSmall_AtTop_HeaderFooter": {3, true, true, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -123,77 +123,73 @@ var floatForwardDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=5)",
 		},
 	},
-	"FloatForward_TermHeightSmall_AtBottom": {3, false, false, 49, FloatForward, 50,
+	"FloatFree_TermHeightSmall_AtBottom": {3, false, false, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
-			{row: 48, value: []byte("")},
 			{row: 49, value: []byte("")},
 			{row: 50, value: []byte("")},
 			// draw the first update
-			{row: 48, value: []byte("LineIdx:0")},
-			{row: 49, value: []byte("LineIdx:1")},
-			{row: 50, value: []byte("LineIdx:2")},
+			{row: 49, value: []byte("LineIdx:0")},
+			{row: 50, value: []byte("LineIdx:1")},
 		},
-		[]string{},
+		[]string{
+			"line is out of bounds (row=51)",
+		},
 	},
-	"FloatForward_TermHeightSmall_AtBottom_Header": {3, true, false, 49, FloatForward, 50,
+	"FloatFree_TermHeightSmall_AtBottom_Header": {3, true, false, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
-			{row: 47, value: []byte("")},
-			{row: 48, value: []byte("")},
 			{row: 49, value: []byte("")},
 			{row: 50, value: []byte("")},
 			// draw the first update
-			{row: 47, value: []byte("theHeader")},
-			{row: 48, value: []byte("LineIdx:0")},
-			{row: 49, value: []byte("LineIdx:1")},
-			{row: 50, value: []byte("LineIdx:2")},
+			{row: 49, value: []byte("theHeader")},
+			{row: 50, value: []byte("LineIdx:0")},
 		},
-		[]string{},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+		},
 	},
-	"FloatForward_termHeightSmall_AtBottom_Footer": {3, false, true, 49, FloatForward, 50,
+	"FloatFree_termHeightSmall_AtBottom_Footer": {3, false, true, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
-			{row: 47, value: []byte("")},
-			{row: 48, value: []byte("")},
 			{row: 49, value: []byte("")},
 			{row: 50, value: []byte("")},
 			// draw the first update
-			{row: 47, value: []byte("LineIdx:0")},
-			{row: 48, value: []byte("LineIdx:1")},
-			{row: 49, value: []byte("LineIdx:2")},
-			{row: 50, value: []byte("theFooter")},
+			{row: 49, value: []byte("LineIdx:0")},
+			{row: 50, value: []byte("LineIdx:1")},
 		},
-		[]string{},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+		},
 	},
-	"FloatForward_TermHeightSmall_AtBottom_HeaderFooter": {3, true, true, 49, FloatForward, 50,
+	"FloatFree_TermHeightSmall_AtBottom_HeaderFooter": {3, true, true, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
-			{row: 46, value: []byte("")},
-			{row: 47, value: []byte("")},
-			{row: 48, value: []byte("")},
 			{row: 49, value: []byte("")},
 			{row: 50, value: []byte("")},
 			// draw the first update
-			{row: 46, value: []byte("theHeader")},
-			{row: 47, value: []byte("LineIdx:0")},
-			{row: 48, value: []byte("LineIdx:1")},
-			{row: 49, value: []byte("LineIdx:2")},
-			{row: 50, value: []byte("theFooter")},
+			{row: 49, value: []byte("theHeader")},
+			{row: 50, value: []byte("LineIdx:0")},
 		},
-		[]string{},
+		[]string{
+			"line is out of bounds (row=51)",
+			"line is out of bounds (row=52)",
+			"line is out of bounds (row=53)",
+		},
 	},
 }
 
-func Test_FloatForwardPolicy_Frame_Draw(t *testing.T) {
+func Test_FloatFreePolicy_Frame_Draw(t *testing.T) {
 
-	names := make([]string, 0, len(floatForwardDrawTestCases))
-	for name := range floatForwardDrawTestCases {
+	names := make([]string, 0, len(floatFreeDrawTestCases))
+	for name := range floatFreeDrawTestCases {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	for _, test := range names {
-		table := floatForwardDrawTestCases[test]
+		table := floatFreeDrawTestCases[test]
 		suppressOutput(func() {
 			// setup...
 			terminalHeight = table.terminalHeight
@@ -211,13 +207,13 @@ func Test_FloatForwardPolicy_Frame_Draw(t *testing.T) {
 				PositionPolicy: table.policy,
 			})
 			if table.hasHeader {
-				frame.header.buffer = []byte("theHeader")
+				frame.Header.buffer = []byte("theHeader")
 			}
-			for idx, line := range frame.activeLines {
+			for idx, line := range frame.Lines {
 				line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
 			}
 			if table.hasFooter {
-				frame.footer.buffer = []byte("theFooter")
+				frame.Footer.buffer = []byte("theFooter")
 			}
 			errs = frame.Draw()
 
@@ -229,15 +225,15 @@ func Test_FloatForwardPolicy_Frame_Draw(t *testing.T) {
 
 }
 
-func Test_FloatForwardPolicy_Frame_AdhocDraw(t *testing.T) {
+func Test_FloatFreePolicy_Frame_AdhocDraw(t *testing.T) {
 
-	names := make([]string, 0, len(floatForwardDrawTestCases))
-	for name := range floatForwardDrawTestCases {
+	names := make([]string, 0, len(floatFreeDrawTestCases))
+	for name := range floatFreeDrawTestCases {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	for _, test := range names {
-		table := floatForwardDrawTestCases[test]
+		table := floatFreeDrawTestCases[test]
 		suppressOutput(func() {
 			// setup...
 			terminalHeight = table.terminalHeight
@@ -256,19 +252,19 @@ func Test_FloatForwardPolicy_Frame_AdhocDraw(t *testing.T) {
 				PositionPolicy: table.policy,
 			})
 			if table.hasHeader {
-				err = frame.header.WriteString("theHeader")
+				err = frame.Header.WriteString("theHeader")
 				if err != nil {
 					errs = append(errs, err)
 				}
 			}
-			for idx, line := range frame.activeLines {
+			for idx, line := range frame.Lines {
 				err = line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
 				if err != nil {
 					errs = append(errs, err)
 				}
 			}
 			if table.hasFooter {
-				err = frame.footer.WriteString("theFooter")
+				err = frame.Footer.WriteString("theFooter")
 				if err != nil {
 					errs = append(errs, err)
 				}

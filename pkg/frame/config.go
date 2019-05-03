@@ -1,5 +1,15 @@
 package frame
 
+type Config struct {
+	Lines          int
+	startRow       int
+	HasHeader      bool
+	HasFooter      bool
+	TrailOnRemove  bool
+	PositionPolicy PositionPolicy
+	ManualDraw     bool
+}
+
 func (config *Config) VisibleHeight() int {
 	height := config.Height()
 	forwardDrawAreaHeight := terminalHeight - (config.startRow - 1)

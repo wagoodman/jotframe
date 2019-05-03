@@ -40,7 +40,7 @@ func Close() error {
 	for _, frame := range allFrames {
 		frame.close()
 	}
-	// allow the frames to exist as a trail now. Advance the screen to allow room for the cursor.
+	// allow the frames to exist as a trail now. advance the screen to allow room for the cursor.
 	row, _ := GetCursorRow()
 	if row == terminalHeight {
 		advanceScreen(1)

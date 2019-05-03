@@ -13,6 +13,15 @@ var (
 	screenLock *sync.Mutex
 )
 
+type ScreenEventHandler interface {
+	onEvent(*ScreenEvent)
+}
+
+type ScreenEvent struct {
+	value []byte
+	row   int
+}
+
 func newScreenEvent(line *Line) *ScreenEvent {
 	e := &ScreenEvent{
 		row:   line.row,

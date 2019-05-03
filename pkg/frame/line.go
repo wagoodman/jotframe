@@ -11,6 +11,16 @@ import (
 	"github.com/k0kubun/go-ansi"
 )
 
+type Line struct {
+	id          uuid.UUID
+	buffer      []byte
+	row         int
+	lock        *sync.Mutex
+	closeSignal *sync.WaitGroup
+	closed      bool
+	stale       bool
+}
+
 func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
 	if closeSignal != nil {
 		closeSignal.Add(1)
@@ -47,7 +57,7 @@ func (line *Line) IsClosed() bool {
 }
 
 func (line Line) String() string {
-	return fmt.Sprintf("<Line row:%d closed:%v bufferLen:%d>", line.row, line.closed, len(line.buffer))
+	return fmt.Sprintf("<Line row:%d buff:%d id:%v>", line.row, len(line.buffer), line.id)
 }
 
 func (line *Line) move(rows int) {

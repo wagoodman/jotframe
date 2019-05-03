@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"github.com/google/uuid"
 	"sync"
 	"testing"
 )
@@ -22,12 +23,14 @@ func Test_Line_String(t *testing.T) {
 		message     string
 		expectedStr string
 	}{
-		{1, "This test will do well..", "<Line row:1 closed:false bufferLen:24>"},
-		{2, "...won't it?", "<Line row:2 closed:false bufferLen:12>"},
+		{1, "This test will do well..", "<Line row:1 buff:24 id:f47ac10b-58cc-0372-8567-0e02b2c3d479>"},
+		{2, "...won't it?", "<Line row:2 buff:12 id:f47ac10b-58cc-0372-8567-0e02b2c3d479>"},
 	}
 
 	for _, table := range tables {
 		line := NewLine(table.row, &sync.WaitGroup{})
+		u, _ := uuid.Parse("f47ac10b-58cc-0372-8567-0e02b2c3d479")
+		line.id = u
 		line.buffer = []byte(table.message)
 
 		expectedResult := table.expectedStr

@@ -8,38 +8,28 @@ import (
 	"time"
 )
 
-func renderLine(idx int, line *frame.Line) {
-	minMs := 10
-	maxMs := 50
+func renderLine(idx int, line *frame.Line, fr *frame.Frame) {
 
 	message := fmt.Sprintf("%s %s INITIALIZED", line, time.Now())
 	io.WriteString(line, message)
-	for idx := 100; idx > 0; idx-- {
-		// sleep for a bit...
-		randomInterval := rand.Intn(maxMs-minMs) + minMs
-		time.Sleep(time.Duration(randomInterval) * time.Millisecond)
 
-		// write a message to this line...
-		message := fmt.Sprintf("%s CountDown:%d", line, idx)
-		io.WriteString(line, message)
+	time.Sleep(time.Duration(100*idx) * time.Millisecond)
 
-	}
-	// write a final message
-	message = fmt.Sprintf("%s %s", line, "Closed!")
-	io.WriteString(line, message)
-
-	line.Close()
+	// line.Close()
+	fr.Remove(line)
 }
 
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	totalLines := 10
 	config := frame.Config{
-		Lines:          5,
-		PositionPolicy: frame.PolicyFloatTop,
+		Lines:          totalLines,
 		HasHeader:      true,
 		HasFooter:      true,
 		TrailOnRemove:  true,
+		PositionPolicy: frame.PolicyFloatForwardTrail,
+		ManualDraw:     false,
 	}
 	fr := frame.New(config)
 
@@ -51,9 +41,13 @@ func main() {
 	fr.Footer.Close()
 
 	// concurrently write to each line
-	for idx := 0; idx < config.Lines; idx++ {
-		go renderLine(idx, fr.Lines[idx])
+	for idx := 0; idx < totalLines; idx++ {
+		// line, _ := fr.Append()
+		line := fr.Lines[idx]
+		// go renderLine(idx, fr.Lines[idx], fr)
+		go renderLine(idx, line, fr)
 	}
+	time.Sleep(time.Duration(10 * time.Second))
 
 	// close the frame
 	fr.Wait()
