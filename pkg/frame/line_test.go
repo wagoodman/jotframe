@@ -2,13 +2,12 @@ package frame
 
 import (
 	"github.com/google/uuid"
-	"sync"
 	"testing"
 )
 
 func Test_NewLine(t *testing.T) {
-
-	line := NewLine(22, &sync.WaitGroup{})
+	events := make(chan ScreenEvent, 100)
+	line := NewLine(22, events)
 
 	expectedRow := 22
 	actualRow := line.row
@@ -28,7 +27,8 @@ func Test_Line_String(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		line := NewLine(table.row, &sync.WaitGroup{})
+		events := make(chan ScreenEvent, 100)
+		line := NewLine(table.row, events)
 		u, _ := uuid.Parse("f47ac10b-58cc-0372-8567-0e02b2c3d479")
 		line.id = u
 		line.buffer = []byte(table.message)
@@ -53,7 +53,8 @@ func Test_Line_move(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		line := NewLine(table.row, &sync.WaitGroup{})
+		events := make(chan ScreenEvent, 100)
+		line := NewLine(table.row, events)
 		line.move(table.moveRows)
 
 		expectedResult := table.row + table.moveRows

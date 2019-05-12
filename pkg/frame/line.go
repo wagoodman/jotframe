@@ -3,12 +3,10 @@ package frame
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/k0kubun/go-ansi"
 )
 
 type Line struct {
@@ -16,32 +14,31 @@ type Line struct {
 	buffer      []byte
 	row         int
 	lock        *sync.Mutex
-	closeSignal *sync.WaitGroup
 	closed      bool
 	stale       bool
+	events      chan ScreenEvent
 }
 
-func NewLine(row int, closeSignal *sync.WaitGroup) *Line {
-	if closeSignal != nil {
-		closeSignal.Add(1)
-	}
+func NewLine(row int, events chan ScreenEvent) *Line {
 	return &Line{
 		id:          uuid.New(),
 		row:         row,
-		lock:        getScreenLock(),
+		lock:        getScreen().lock,
 		stale:       true,
-		closeSignal: closeSignal,
+		events:      events,
 	}
 }
 
-func (line *Line) notify() {
-	if len(screenHandlers) == 0 {
-		return
-	}
+func (line *Line) notify() error {
 	event := newScreenEvent(line)
-	for _, handler := range screenHandlers {
+	line.events <- *event
+	if len(getScreen().handlers) == 0 {
+		return nil
+	}
+	for _, handler := range getScreen().handlers {
 		handler.onEvent(event)
 	}
+	return nil
 }
 
 func (line *Line) Id() uuid.UUID {
@@ -77,17 +74,11 @@ func (line *Line) Clear() error {
 }
 
 func (line *Line) clear(preserveBuffer bool) error {
-
-	err := clearRow(line.row)
-	if err != nil {
-		return err
-	}
-
 	if !preserveBuffer {
 		line.buffer = []byte("")
 	}
-	line.notify()
-	return nil
+
+	return line.notify()
 }
 
 func (line *Line) Read(buff []byte) (int, error) {
@@ -109,9 +100,6 @@ func (line *Line) WriteString(str string) error {
 }
 
 func (line *Line) Write(buff []byte) (int, error) {
-	if line.closed {
-		return -1, fmt.Errorf("line is closed")
-	}
 	line.lock.Lock()
 	defer line.lock.Unlock()
 
@@ -119,20 +107,17 @@ func (line *Line) Write(buff []byte) (int, error) {
 }
 
 func (line *Line) write(buff []byte) (int, error) {
+	if line.closed {
+		return -1, fmt.Errorf("line is closed")
+	}
+
 	line.buffer = []byte(strings.Split(string(buff), lineBreak)[0])
 
 	if line.row < 0 || line.row > terminalHeight {
 		return -1, fmt.Errorf("line is out of bounds (row=%d)", line.row)
 	}
 
-	err := clearRow(line.row)
-	if err != nil {
-		return -1, err
-	}
-	ansi.CursorHorizontalAbsolute(0)
-
-	line.notify()
-	return os.Stdout.Write(line.buffer)
+	return len(line.buffer), line.notify()
 }
 
 func (line *Line) WriteStringAndClose(str string) (int, error) {
@@ -167,9 +152,6 @@ func (line *Line) Open() error {
 func (line *Line) open() error {
 	if line.closed {
 		line.closed = false
-		if line.closeSignal != nil {
-			line.closeSignal.Add(1)
-		}
 	}
 
 	return nil
@@ -185,9 +167,6 @@ func (line *Line) Close() error {
 func (line *Line) close() error {
 	if !line.closed {
 		line.closed = true
-		if line.closeSignal != nil {
-			line.closeSignal.Done()
-		}
 	}
 
 	return nil

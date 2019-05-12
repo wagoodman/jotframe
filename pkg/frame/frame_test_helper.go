@@ -36,8 +36,8 @@ func (handler *TestEventHandler) onEvent(event *ScreenEvent) {
 
 type drawTestParams struct {
 	rows           int
-	hasHeader      bool
-	hasFooter      bool
+	headers        int
+	footers        int
 	startRow       int
 	policy         PositionPolicy
 	terminalHeight int

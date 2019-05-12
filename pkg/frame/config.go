@@ -1,10 +1,11 @@
 package frame
 
 type Config struct {
+	test           bool
 	Lines          int
 	startRow       int
-	HasHeader      bool
-	HasFooter      bool
+	HeaderRows     int
+	FooterRows     int
 	TrailOnRemove  bool
 	PositionPolicy PositionPolicy
 	ManualDraw     bool
@@ -21,12 +22,5 @@ func (config *Config) VisibleHeight() int {
 }
 
 func (config *Config) Height() int {
-	height := config.Lines
-	if config.HasHeader {
-		height++
-	}
-	if config.HasFooter {
-		height++
-	}
-	return height
+	return config.Lines + config.HeaderRows + config.FooterRows
 }

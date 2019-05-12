@@ -30,10 +30,10 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 }
 
 func (wq *WorkQueue) Work() {
-	fr := frame.New(frame.Config{
+	fr, _, _, _ := frame.New(frame.Config{
 		Lines:          0,
-		HasHeader:      false,
-		HasFooter:      false,
+		HeaderRows:     0,
+		FooterRows:     0,
 		TrailOnRemove:  true,
 		PositionPolicy: frame.PolicyFloatForwardTrail,
 		ManualDraw:     false,
@@ -55,7 +55,6 @@ func (wq *WorkQueue) Work() {
 		go jotFunc(worker.Work, line)
 	}
 
-	fr.Wait()
 	fr.Close()
 
 	ansi.CursorShow()

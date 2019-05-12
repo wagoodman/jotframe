@@ -1,65 +1,150 @@
 package frame
 
 import (
+	"context"
 	"fmt"
+	"github.com/k0kubun/go-ansi"
+	"log"
+	"os"
 	"strings"
 	"sync"
-
-	"github.com/k0kubun/go-ansi"
 )
 
 var (
-	lockSync   sync.Once
-	screenLock *sync.Mutex
+	screenSync sync.Once
+	theScr     *screen
 )
 
-type ScreenEventHandler interface {
-	onEvent(*ScreenEvent)
+type screen struct {
+	lock   *sync.Mutex
+	events chan ScreenEvent
+	frames  []*Frame
+	handlers []EventHandler
 }
 
-type ScreenEvent struct {
-	value []byte
-	row   int
+func getScreen() *screen {
+	screenSync.Do(func() {
+		theScr = &screen{
+			lock: &sync.Mutex{},
+			events: make(chan ScreenEvent, 10000000),
+			frames: make([]*Frame, 0),
+			handlers: make([]EventHandler, 0),
+		}
+	})
+	return theScr
 }
 
-func newScreenEvent(line *Line) *ScreenEvent {
-	e := &ScreenEvent{
-		row:   line.row,
-		value: make([]byte, len(line.buffer)),
+func (scr *screen) reset() {
+	theScr = &screen{
+		lock: &sync.Mutex{},
+		events: make(chan ScreenEvent, 10000000),
+		frames: make([]*Frame, 0),
+		handlers: make([]EventHandler, 0),
 	}
-	copy(e.value, line.buffer)
-	return e
 }
 
-// TODO: this should be a ScreenEvent!
-func advanceScreen(rows int) {
-	setCursorRow(terminalHeight)
-	fmt.Print(strings.Repeat(lineBreak, rows))
-}
-
-func writeAtRow(message string, row int) {
-	setCursorRow(row)
-	fmt.Print(strings.Replace(message, lineBreak, "", -1))
-}
-
-// todo: assumes VT100, not cross platform
-func clearScreen() {
-	fmt.Print("\x1b[2J")
-}
-
-// TODO: this should be a ScreenEvent!
-func clearRow(row int) error {
-	err := setCursorRow(row)
-	if err != nil {
-		panic(err)
+func (scr *screen) register(frame *Frame) error {
+	if len(scr.frames) > 0 {
+		return fmt.Errorf("only one frame is allowed on the screen")
 	}
-	ansi.EraseInLine(2)
+	scr.frames = append(scr.frames, frame)
 	return nil
 }
 
-func getScreenLock() *sync.Mutex {
-	lockSync.Do(func() {
-		screenLock = &sync.Mutex{}
-	})
-	return screenLock
+func (scr *screen) addScreenHandler(handler EventHandler) {
+	scr.handlers = append(scr.handlers, handler)
+}
+
+// func Refresh() error {
+// 	lock := getScreenLock()
+// 	lock.Lock()
+// 	defer lock.Unlock()
+//
+// 	return refresh()
+// }
+
+func (scr *screen) refresh() error {
+	for _, frame := range scr.frames {
+		if !frame.IsClosed() {
+			frame.clear()
+			// frame.update()
+			frame.draw()
+		}
+	}
+	return nil
+}
+
+func (scr *screen) Close() error {
+
+	scr.lock.Lock()
+	defer scr.lock.Unlock()
+
+	for _, frame := range scr.frames {
+		frame.close()
+	}
+	// allow the frames to exist as a trail now. advance the screen to allow room for the cursor.
+	row, _ := GetCursorRow()
+	if row == terminalHeight {
+		scr.advance(1)
+	}
+
+	return nil
+}
+
+
+
+// TODO: this should be a ScreenEvent!
+func (scr *screen) advance(rows int) {
+	scr.events <- ScreenEvent{
+		row: terminalHeight,
+		value: []byte(fmt.Sprint(strings.Repeat(lineBreak, rows))),
+	}
+}
+
+func (scr *screen) writeAtRow(message string, row int) {
+	scr.events <- ScreenEvent{
+		row: row,
+		value: []byte(strings.Replace(message, lineBreak, "", -1)),
+	}
+}
+
+// // todo: assumes VT100, not cross platform
+// func clearScreen() {
+// 	fmt.Print("\x1b[2J")
+// }
+
+
+
+func (scr *screen) Run(ctx context.Context) error {
+	f, err := os.OpenFile("event.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case event := <-scr.events:
+			log.Println(fmt.Sprintf("%d %s", event.row, string(event.value)))
+			// clear the row
+			err := setCursorRow(event.row)
+			if err != nil {
+				return err
+			}
+			ansi.EraseInLine(2)
+			ansi.CursorHorizontalAbsolute(0)
+
+			// write the output
+			_, err = os.Stdout.Write(event.value)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+	}
+	// setCursorRow(frame.StartIdx + frame.height())
+	return nil
 }

@@ -38,11 +38,11 @@ func pollSignals() {
 		select {
 		case <-sigwinch:
 			terminalWidth, terminalHeight = getTerminalSize()
-			lock := getScreenLock()
+			lock := getScreen().lock
 			lock.Lock()
 			// the screen may have a trail, which is unmanaged at this point. Don't clear the screen
 			// clearScreen()
-			refresh()
+			getScreen().refresh()
 			lock.Unlock()
 		}
 	}

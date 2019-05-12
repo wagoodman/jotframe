@@ -7,7 +7,7 @@ import (
 )
 
 var floatFreeDrawTestCases = map[string]drawTestParams{
-	"FloatFree_goCase": {3, false, false, 10, PolicyFloatOverflow, 40,
+	"FloatFree_goCase": {3, 0, 0, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -20,7 +20,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_Header": {3, true, false, 10, PolicyFloatOverflow, 40,
+	"FloatFree_Header": {3, 1, 0, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -35,7 +35,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_Footer": {3, false, true, 10, PolicyFloatOverflow, 40,
+	"FloatFree_Footer": {3, 0, 1, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -50,7 +50,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_HeaderFooter": {3, true, true, 10, PolicyFloatOverflow, 40,
+	"FloatFree_HeaderFooter": {3, 1, 1, 10, PolicyFloatOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -67,7 +67,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_TermHeightSmall_AtTop": {3, false, false, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop": {3, 0, 0, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -80,7 +80,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=3)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_Header": {3, true, false, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_Header": {3, 1, 0, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -94,7 +94,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_Footer": {3, false, true, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_Footer": {3, 0, 1, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -108,7 +108,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_HeaderFooter": {3, true, true, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_HeaderFooter": {3, 1, 1, 1, PolicyFloatOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -123,7 +123,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=5)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom": {3, false, false, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom": {3, 0, 0, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -136,7 +136,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=51)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom_Header": {3, true, false, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom_Header": {3, 1, 0, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -150,7 +150,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=52)",
 		},
 	},
-	"FloatFree_termHeightSmall_AtBottom_Footer": {3, false, true, 49, PolicyFloatOverflow, 50,
+	"FloatFree_termHeightSmall_AtBottom_Footer": {3, 0, 1, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -164,7 +164,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=52)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom_HeaderFooter": {3, true, true, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom_HeaderFooter": {3, 1, 1, 49, PolicyFloatOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -189,38 +189,41 @@ func Test_FloatFreePolicy_Frame_Draw(t *testing.T) {
 	}
 	sort.Strings(names)
 	for _, test := range names {
+		getScreen().reset()
 		table := floatFreeDrawTestCases[test]
-		suppressOutput(func() {
-			// setup...
-			terminalHeight = table.terminalHeight
-			handler := NewTestEventHandler(t)
-			screenHandlers = make([]ScreenEventHandler, 0)
-			addScreenHandler(handler)
 
-			// run test...
-			var errs []error
-			frame := New(Config{
-				Lines:          table.rows,
-				HasHeader:      table.hasHeader,
-				HasFooter:      table.hasFooter,
-				startRow:       table.startRow,
-				PositionPolicy: table.policy,
-			})
-			if table.hasHeader {
-				frame.Header.buffer = []byte("theHeader")
-			}
-			for idx, line := range frame.Lines {
-				line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
-			}
-			if table.hasFooter {
-				frame.Footer.buffer = []byte("theFooter")
-			}
-			errs = frame.Draw()
+		// setup...
+		terminalHeight = table.terminalHeight
+		handler := NewTestEventHandler(t)
+		scr := getScreen()
+		scr.handlers = make([]EventHandler, 0)
+		scr.addScreenHandler(handler)
 
-			// assert results...
-			validateEvents(t, test, table, errs, frame, handler)
-
+		// run test...
+		var errs []error
+		frame, _, _, _ := New(Config{
+			test: true,
+			Lines:          table.rows,
+			HeaderRows:     table.headers,
+			FooterRows:     table.footers,
+			startRow:       table.startRow,
+			PositionPolicy: table.policy,
 		})
+		if table.headers > 0 {
+			frame.Headers[0].buffer = []byte("theHeader")
+		}
+		for idx, line := range frame.Lines {
+			line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
+		}
+		if table.footers > 0 {
+			frame.Footers[0].buffer = []byte("theFooter")
+		}
+		errs = frame.Draw()
+
+		// assert results...
+		validateEvents(t, test, table, errs, frame, handler)
+
+
 	}
 
 }
@@ -233,47 +236,50 @@ func Test_FloatFreePolicy_Frame_AdhocDraw(t *testing.T) {
 	}
 	sort.Strings(names)
 	for _, test := range names {
+		getScreen().reset()
 		table := floatFreeDrawTestCases[test]
-		suppressOutput(func() {
-			// setup...
-			terminalHeight = table.terminalHeight
-			handler := NewTestEventHandler(t)
-			screenHandlers = make([]ScreenEventHandler, 0)
-			addScreenHandler(handler)
 
-			// run test...
-			var err error
-			var errs = make([]error, 0)
-			frame := New(Config{
-				Lines:          table.rows,
-				HasHeader:      table.hasHeader,
-				HasFooter:      table.hasFooter,
-				startRow:       table.startRow,
-				PositionPolicy: table.policy,
-			})
-			if table.hasHeader {
-				err = frame.Header.WriteString("theHeader")
-				if err != nil {
-					errs = append(errs, err)
-				}
-			}
-			for idx, line := range frame.Lines {
-				err = line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
-				if err != nil {
-					errs = append(errs, err)
-				}
-			}
-			if table.hasFooter {
-				err = frame.Footer.WriteString("theFooter")
-				if err != nil {
-					errs = append(errs, err)
-				}
-			}
+		// setup...
+		terminalHeight = table.terminalHeight
+		handler := NewTestEventHandler(t)
+		scr := getScreen()
+		scr.handlers = make([]EventHandler, 0)
+		scr.addScreenHandler(handler)
 
-			// assert results...
-			validateEvents(t, test, table, errs, frame, handler)
-
+		// run test...
+		var err error
+		var errs = make([]error, 0)
+		frame, _, _, _ := New(Config{
+			test: true,
+			Lines:          table.rows,
+			HeaderRows:     table.headers,
+			FooterRows:     table.footers,
+			startRow:       table.startRow,
+			PositionPolicy: table.policy,
 		})
+		if table.headers > 0 {
+			err = frame.Headers[0].WriteString("theHeader")
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+		for idx, line := range frame.Lines {
+			err = line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+		if table.footers > 0 {
+			err = frame.Footers[0].WriteString("theFooter")
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		// assert results...
+		validateEvents(t, test, table, errs, frame, handler)
+
+
 	}
 
 }
