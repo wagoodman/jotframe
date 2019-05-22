@@ -10,10 +10,10 @@ type Frame struct {
 	Config Config
 	lock   *sync.Mutex
 
-	StartIdx int
-	Headers  []*Line
-	Lines    []*Line
-	Footers  []*Line
+	startIdx    int
+	HeaderLines []*Line
+	BodyLines   []*Line
+	FooterLines []*Line
 
 	clearRows       []int
 	trailRows       []string
@@ -28,35 +28,36 @@ type Frame struct {
 
 func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 	frame := &Frame{
-		StartIdx:    config.startRow,
-		Config:      config,
-		lock:        getScreen().lock,
-		autoDraw:    !config.ManualDraw,
-		events:      getScreen().events,
+		startIdx: config.startRow,
+		Config:   config,
+		lock:     getScreen().lock,
+		autoDraw: !config.ManualDraw,
+		events:   getScreen().events,
 	}
 
 	switch config.PositionPolicy {
-	case PolicyFloatOverflow:
-		frame.policy = newFloatOverflowPolicy(frame)
+	case PolicyOverflow:
+		frame.policy = newOverflowPolicy(frame)
 	default:
 		panic(fmt.Errorf("unknown policy: %v", config.PositionPolicy))
 	}
 
+	// set the frame start row
 	frame.policy.onInit()
 
 	for idx := 0; idx < config.HeaderRows; idx++ {
 		// todo: should headers have closeSignal waitGroups? or should they be nil?
-		line := NewLine(frame.StartIdx+idx, frame.events)
-		frame.Headers = append(frame.Headers, line)
+		line := NewLine(frame.startIdx+idx, frame.events)
+		frame.HeaderLines = append(frame.HeaderLines, line)
 	}
 	for idx := 0; idx < config.Lines; idx++ {
-		line := NewLine(frame.StartIdx+config.HeaderRows+idx, frame.events)
-		frame.Lines = append(frame.Lines, line)
+		line := NewLine(frame.startIdx+config.HeaderRows+idx, frame.events)
+		frame.BodyLines = append(frame.BodyLines, line)
 	}
 	for idx := 0; idx < config.FooterRows; idx++ {
 		// todo: should footers have closeSignal waitGroups? or should they be nil?
-		line := NewLine(frame.StartIdx+config.HeaderRows+config.Lines+idx, frame.events)
-		frame.Footers = append(frame.Footers, line)
+		line := NewLine(frame.startIdx+config.HeaderRows+config.Lines+idx, frame.events)
+		frame.FooterLines = append(frame.FooterLines, line)
 	}
 
 	// register frame before drawing to screen
@@ -83,6 +84,7 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 
 func (frame *Frame) newLine(rowIdx int) *Line {
 	newLine := NewLine(rowIdx, frame.events)
+	newLine.frame = frame
 	return newLine
 }
 
@@ -106,20 +108,38 @@ func (frame *Frame) appendTrail(str string) {
 	// todo: what about update/draw here?
 }
 
-func (frame *Frame) Height() int {
-	height := len(frame.Lines)
-	if frame.Headers != nil {
-		height++
-	}
-	if frame.Footers != nil {
-		height++
+func (frame *Frame) visibleBodyLines() int {
+	height := 0
+	for _, line := range frame.BodyLines {
+		height += line.height
 	}
 	return height
 }
 
+func (frame *Frame) visibleHeaderLines() int {
+	height := 0
+	for _, line := range frame.HeaderLines {
+		height += line.height
+	}
+	return height
+}
+
+func (frame *Frame) visibleFooterLines() int {
+	height := 0
+	for _, line := range frame.FooterLines {
+		height += line.height
+	}
+	return height
+}
+
+
+func (frame *Frame) Height() int {
+	return frame.visibleBodyLines() + frame.visibleFooterLines() + frame.visibleHeaderLines()
+}
+
 func (frame *Frame) VisibleHeight() int {
 	height := frame.Height()
-	forwardDrawArea := terminalHeight - (frame.StartIdx - 1)
+	forwardDrawArea := terminalHeight - (frame.startIdx - 1)
 
 	if height > forwardDrawArea {
 		return forwardDrawArea
@@ -138,7 +158,7 @@ func (frame *Frame) advance(rows int) {
 
 func (frame *Frame) IsPastScreenTop() bool {
 	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.StartIdx - frame.rowAdvancements
+	futureFrameStartIdx := frame.startIdx - frame.rowAdvancements
 
 	if futureFrameStartIdx < 1 {
 		return true
@@ -150,7 +170,7 @@ func (frame *Frame) IsPastScreenBottom() bool {
 	height := frame.Height()
 
 	// take into account the rows that will be added to the screen realestate
-	futureFrameStartIdx := frame.StartIdx - frame.rowAdvancements
+	futureFrameStartIdx := frame.startIdx - frame.rowAdvancements
 
 	// if the frame has moved past the bottom of the screen, move it up a bit
 	if futureFrameStartIdx+height > terminalHeight {
@@ -168,20 +188,21 @@ func (frame *Frame) AppendHeader() (*Line, error) {
 	defer frame.lock.Unlock()
 
 	var rowIdx int
-	if len(frame.Headers) > 0 {
-		rowIdx = frame.Headers[len(frame.Headers)-1].row + 1
+	headerLines := frame.visibleHeaderLines()
+	if headerLines > 0 {
+		rowIdx = frame.HeaderLines[headerLines-1].row + 1
 	} else {
-		rowIdx = frame.StartIdx
+		rowIdx = frame.startIdx
 	}
 
 	newLine := frame.newLine(rowIdx)
-	frame.Headers = append(frame.Headers, newLine)
+	frame.HeaderLines = append(frame.HeaderLines, newLine)
 
-	for _, line := range frame.Lines{
+	for _, line := range frame.BodyLines {
 		line.move(1)
 	}
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(1)
 	}
 
@@ -203,14 +224,17 @@ func (frame *Frame) AppendFooter() (*Line, error) {
 	defer frame.lock.Unlock()
 
 	var rowIdx int
-	if len(frame.Footers) > 0 {
-		rowIdx = frame.Footers[len(frame.Footers)-1].row + 1
+	footerLines := frame.visibleFooterLines()
+	bodyLines := frame.visibleBodyLines()
+	headerLines := frame.visibleHeaderLines()
+	if footerLines > 0 {
+		rowIdx = frame.FooterLines[footerLines-1].row + 1
 	} else {
-		rowIdx = len(frame.Lines) + len(frame.Headers)
+		rowIdx = bodyLines + headerLines
 	}
 
 	newLine := frame.newLine(rowIdx)
-	frame.Footers = append(frame.Footers, newLine)
+	frame.FooterLines = append(frame.FooterLines, newLine)
 
 	frame.policy.onResize(1)
 
@@ -231,20 +255,21 @@ func (frame *Frame) Append() (*Line, error) {
 	defer frame.lock.Unlock()
 
 	var rowIdx int
-	if len(frame.Lines) > 0 {
-		rowIdx = frame.Lines[len(frame.Lines)-1].row + 1
+	bodyLines := frame.visibleBodyLines()
+	if bodyLines > 0 {
+		rowIdx = frame.BodyLines[bodyLines-1].row + 1
 	} else {
-		rowIdx = frame.StartIdx
-		if frame.Headers != nil {
+		rowIdx = frame.startIdx
+		if frame.HeaderLines != nil {
 			rowIdx += 1
 		}
 
 	}
 
 	newLine := frame.newLine(rowIdx)
-	frame.Lines = append(frame.Lines, newLine)
+	frame.BodyLines = append(frame.BodyLines, newLine)
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(1)
 	}
 
@@ -265,21 +290,21 @@ func (frame *Frame) PrependHeader() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 
-	rowIdx := frame.StartIdx
+	rowIdx := frame.startIdx
 
 	newLine := frame.newLine(rowIdx)
 
-	for _, header := range frame.Headers {
+	for _, header := range frame.HeaderLines {
 		header.move(1)
 	}
 
-	frame.Headers = append([]*Line{newLine}, frame.Headers...)
+	frame.HeaderLines = append([]*Line{newLine}, frame.HeaderLines...)
 
-	for _, line := range frame.Lines {
+	for _, line := range frame.BodyLines {
 		line.move(1)
 	}
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(1)
 	}
 
@@ -300,15 +325,15 @@ func (frame *Frame) PrependFooter() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 
-	rowIdx := frame.StartIdx + len(frame.Lines) + len(frame.Headers)
+	rowIdx := frame.startIdx + frame.visibleBodyLines() + frame.visibleHeaderLines()
 
 	newLine := frame.newLine(rowIdx)
 
-	for _, header := range frame.Footers {
+	for _, header := range frame.FooterLines {
 		header.move(1)
 	}
 
-	frame.Footers = append([]*Line{newLine}, frame.Footers...)
+	frame.FooterLines = append([]*Line{newLine}, frame.FooterLines...)
 
 
 	frame.policy.onResize(1)
@@ -328,19 +353,19 @@ func (frame *Frame) Prepend() (*Line, error) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 
-	rowIdx := frame.StartIdx
-	if frame.Headers != nil {
+	rowIdx := frame.startIdx
+	if frame.HeaderLines != nil {
 		rowIdx += 1
 	}
 
 	newLine := frame.newLine(rowIdx)
 
-	for _, line := range frame.Lines {
+	for _, line := range frame.BodyLines {
 		line.move(1)
 	}
-	frame.Lines = append([]*Line{newLine}, frame.Lines...)
+	frame.BodyLines = append([]*Line{newLine}, frame.BodyLines...)
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(1)
 	}
 
@@ -354,34 +379,38 @@ func (frame *Frame) Prepend() (*Line, error) {
 }
 
 func (frame *Frame) Insert(index int) (*Line, error) {
+	frame.lock.Lock()
+	defer frame.lock.Unlock()
+	return frame.insert(index, false)
+}
+
+func (frame *Frame) insert(index int, show bool) (*Line, error) {
 	if frame.IsClosed() {
 		return nil, fmt.Errorf("frame is closed")
 	}
 
-	frame.lock.Lock()
-	defer frame.lock.Unlock()
-
-	if index < 0 || index > len(frame.Lines) {
+	if index < 0 || index > frame.visibleBodyLines() {
 		return nil, fmt.Errorf("invalid index given")
 	}
 
-	rowIdx := frame.StartIdx + index
-	if frame.Headers != nil {
-		rowIdx += 1
+	rowIdx := frame.startIdx + index + frame.visibleHeaderLines()
+
+	var newLine *Line
+	if show {
+		newLine = frame.BodyLines[index]
+	} else {
+		newLine = frame.newLine(rowIdx)
+		frame.BodyLines = append(frame.BodyLines, nil)
+		copy(frame.BodyLines[index+1:], frame.BodyLines[index:])
+		frame.BodyLines[index] = newLine
 	}
-
-	newLine := frame.newLine(rowIdx)
-
-	frame.Lines = append(frame.Lines, nil)
-	copy(frame.Lines[index+1:], frame.Lines[index:])
-	frame.Lines[index] = newLine
 
 	// bump the indexes for other rows
-	for idx := index + 1; idx < len(frame.Lines); idx++ {
-		frame.Lines[idx].move(1)
+	for idx := index + 1; idx < len(frame.BodyLines); idx++ {
+		frame.BodyLines[idx].move(1)
 	}
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(1)
 	}
 
@@ -397,7 +426,7 @@ func (frame *Frame) Insert(index int) (*Line, error) {
 func (frame *Frame) indexOf(line *Line) int {
 	// find the index of the line object
 	matchedIdx := -1
-	for idx, item := range frame.Lines {
+	for idx, item := range frame.BodyLines {
 		if item == line {
 			return idx
 		}
@@ -407,12 +436,17 @@ func (frame *Frame) indexOf(line *Line) int {
 }
 
 func (frame *Frame) Remove(line *Line) error {
-	if frame.IsClosed() {
-		return fmt.Errorf("frame is closed")
-	}
 
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
+
+	return frame.remove(line, false)
+}
+
+func (frame *Frame) remove(line *Line, hide bool) error {
+	if frame.IsClosed() {
+		return fmt.Errorf("frame is closed")
+	}
 
 	// find the index of the line object
 	matchedIdx := frame.indexOf(line)
@@ -421,31 +455,53 @@ func (frame *Frame) Remove(line *Line) error {
 		return fmt.Errorf("could not find line in frame")
 	}
 
-	// Lines that are removed must be closed since any further writes will result in line clashes
-	frame.Lines[matchedIdx].close()
-	contents := frame.Lines[matchedIdx].buffer
+	// BodyLines that are removed must be closed since any further writes will result in line clashes
+	if !hide {
+		frame.BodyLines[matchedIdx].close()
+	}
+	contents := frame.BodyLines[matchedIdx].buffer
 
 	// erase the contents of the last line of the Frame, but persist the line buffer
-	if len(frame.Footers) >0 {
-		frame.clearRows = append(frame.clearRows, frame.Footers[len(frame.Footers)-1].row)
+	lastVisibleFooterLine := -1
+	for idx := len(frame.FooterLines)-1; idx >= 0; idx-- {
+		if frame.FooterLines[idx].visible {
+			lastVisibleFooterLine = idx
+			break
+		}
+	}
+	if lastVisibleFooterLine >= 0 {
+		frame.clearRows = append(frame.clearRows, frame.FooterLines[lastVisibleFooterLine].row)
 	} else {
-		frame.clearRows = append(frame.clearRows, frame.Lines[len(frame.Lines)-1].row)
+		var lastVisibleBodyLine int
+		for idx := len(frame.BodyLines)-1; idx >= 0; idx-- {
+			if frame.BodyLines[idx].visible {
+				lastVisibleBodyLine = idx
+				break
+			}
+		}
+		frame.clearRows = append(frame.clearRows, frame.BodyLines[lastVisibleBodyLine].row)
 	}
 
 	// Remove the line entry from the list
-	frame.Lines = append(frame.Lines[:matchedIdx], frame.Lines[matchedIdx+1:]...)
-
-	// move each line index ahead of the deleted element
-	for idx := matchedIdx; idx < len(frame.Lines); idx++ {
-		frame.Lines[idx].move(-1)
+	if !hide {
+		frame.BodyLines = append(frame.BodyLines[:matchedIdx], frame.BodyLines[matchedIdx+1:]...)
 	}
 
-	for _, footer := range frame.Footers{
+
+	// move each line index ahead of the deleted element
+	for idx := matchedIdx; idx < len(frame.BodyLines); idx++ {
+		if hide && idx == matchedIdx {
+			continue
+		}
+		frame.BodyLines[idx].move(-1)
+	}
+
+	for _, footer := range frame.FooterLines {
 		footer.move(-1)
 	}
 
 	// apply policies
-	if frame.Config.TrailOnRemove {
+	if !hide && frame.Config.TrailOnRemove {
 		frame.appendTrail(string(contents))
 	} else {
 		frame.policy.onResize(-1)
@@ -470,15 +526,15 @@ func (frame *Frame) Clear() {
 }
 
 func (frame *Frame) clear() {
-	for _, header := range frame.Headers {
+	for _, header := range frame.HeaderLines {
 		frame.clearRows = append(frame.clearRows, header.row)
 	}
 
-	for _, line := range frame.Lines {
+	for _, line := range frame.BodyLines {
 		frame.clearRows = append(frame.clearRows, line.row)
 	}
 
-	for _, footer := range frame.Footers {
+	for _, footer := range frame.FooterLines {
 		frame.clearRows = append(frame.clearRows, footer.row)
 	}
 }
@@ -488,19 +544,25 @@ func (frame *Frame) Close() {
 	defer frame.lock.Unlock()
 	frame.close()
 	// frame.policy.onClose()
+
+	// todo: make this a screen write, starting at the last line of the frame and inserting a
+	// newline char with the screen loop (should we kill the screen loop afterwards?)
+	fmt.Println()
+
+
 	frame.draw()
 }
 
 func (frame *Frame) close() {
-	for _, header := range frame.Headers{
+	for _, header := range frame.HeaderLines {
 		header.close()
 	}
 
-	for _, line := range frame.Lines {
+	for _, line := range frame.BodyLines {
 		line.close()
 	}
 
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.close()
 	}
 
@@ -510,20 +572,20 @@ func (frame *Frame) close() {
 // todo: I think this should be decided by the user via a Close() action, not by the indication of closed lines
 // since you can always add another line... you don't know when an empty frame should remain open or not
 func (frame *Frame) IsClosed() bool {
-	// if frame.Headers != nil {
-	// 	if !frame.Headers.closed {
+	// if frame.HeaderLines != nil {
+	// 	if !frame.HeaderLines.closed {
 	// 		return false
 	// 	}
 	// }
 	//
-	// for _, line := range frame.Lines {
+	// for _, line := range frame.BodyLines {
 	// 	if !line.closed {
 	// 		return false
 	// 	}
 	// }
 	//
-	// if frame.Footers != nil {
-	// 	if !frame.Footers.closed {
+	// if frame.FooterLines != nil {
+	// 	if !frame.FooterLines.closed {
 	// 		return false
 	// 	}
 	// }
@@ -548,19 +610,19 @@ func (frame *Frame) Move(rows int) {
 }
 
 func (frame *Frame) move(rows int) {
-	frame.StartIdx += rows
+	frame.startIdx += rows
 
 	// todo: instead of clearing all frame lines, only clear the ones affected
 	frame.clear()
 
 	// bump rows and redraw entire frame
-	for _, header := range frame.Headers{
+	for _, header := range frame.HeaderLines {
 		header.move(rows)
 	}
-	for _, line := range frame.Lines {
+	for _, line := range frame.BodyLines {
 		line.move(rows)
 	}
-	for _, footer := range frame.Footers{
+	for _, footer := range frame.FooterLines {
 		footer.move(rows)
 	}
 }
@@ -587,7 +649,7 @@ func (frame *Frame) draw() (errs []error) {
 	for idx := 0; idx < frame.rowAdvancements; idx++ {
 		getScreen().advance(1)
 		if idx < len(frame.trailRows) {
-			getScreen().writeAtRow(frame.trailRows[0], frame.StartIdx-len(frame.trailRows)+idx)
+			getScreen().writeAtRow(frame.trailRows[0], frame.startIdx-len(frame.trailRows)+idx)
 			if len(frame.trailRows) >= 1 {
 				frame.trailRows = frame.trailRows[1:]
 			} else {
@@ -599,13 +661,13 @@ func (frame *Frame) draw() (errs []error) {
 
 	// append any remaining trail rows
 	for idx, message := range frame.trailRows {
-		getScreen().writeAtRow(message, frame.StartIdx-len(frame.trailRows)+idx)
+		getScreen().writeAtRow(message, frame.startIdx-len(frame.trailRows)+idx)
 	}
 	frame.trailRows = make([]string, 0)
 
 	// paint all stale lines to the screen
-	for _, header := range frame.Headers {
-		if header.stale || frame.stale {
+	for _, header := range frame.HeaderLines {
+		if header.visible && (header.stale || frame.stale) {
 			_, err := header.write(header.buffer)
 			if err != nil {
 				errs = append(errs, err)
@@ -613,8 +675,8 @@ func (frame *Frame) draw() (errs []error) {
 		}
 	}
 
-	for _, line := range frame.Lines {
-		if line.stale || frame.stale {
+	for _, line := range frame.BodyLines {
+		if line.visible && (line.stale || frame.stale) {
 			_, err := line.write(line.buffer)
 			if err != nil {
 				errs = append(errs, err)
@@ -622,8 +684,8 @@ func (frame *Frame) draw() (errs []error) {
 		}
 	}
 
-	for _, footer := range frame.Footers {
-		if footer.stale || frame.stale {
+	for _, footer := range frame.FooterLines {
+		if footer.visible && (footer.stale || frame.stale) {
 			_, err := footer.write(footer.buffer)
 			if err != nil {
 				errs = append(errs, err)
@@ -632,7 +694,7 @@ func (frame *Frame) draw() (errs []error) {
 	}
 
 	// if frame.IsClosed() {
-	// 	setCursorRow(frame.StartIdx + frame.Height())
+	// 	setCursorRow(frame.startIdx + frame.Height())
 	// }
 
 	return errs

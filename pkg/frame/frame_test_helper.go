@@ -47,8 +47,8 @@ type drawTestParams struct {
 
 func validateEvents(t *testing.T, test string, table drawTestParams, errs []error, frame *Frame, handler *TestEventHandler) {
 
-	if len(frame.Lines) != table.rows {
-		t.Errorf("[case=%s] expected %d rows, got %d", test, table.rows, len(frame.Lines))
+	if len(frame.BodyLines) != table.rows {
+		t.Errorf("[case=%s] expected %d rows, got %d", test, table.rows, len(frame.BodyLines))
 	}
 
 	if len(table.errors) != len(errs) {

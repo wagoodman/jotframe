@@ -35,26 +35,26 @@ func Test_NewFrame(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 
-		// verify the Headers
-		if table.headers != len(frame.Headers) {
-			t.Errorf("NewFrame: expected headers to be %d but got %d", table.headers, len(frame.Headers))
+		// verify the HeaderLines
+		if table.headers != len(frame.HeaderLines) {
+			t.Errorf("NewFrame: expected headers to be %d but got %d", table.headers, len(frame.HeaderLines))
 		}
 
-		// verify the Footers
-		if table.footers != len(frame.Footers) {
-			t.Errorf("NewFrame: expected footers to be %d but got %d", table.footers, len(frame.Footers))
+		// verify the FooterLines
+		if table.footers != len(frame.FooterLines) {
+			t.Errorf("NewFrame: expected footers to be %d but got %d", table.footers, len(frame.FooterLines))
 		}
 
 		// verify the number of lines in the frame list
-		actualLineRowLen := len(frame.Lines)
+		actualLineRowLen := len(frame.BodyLines)
 		expectedLineRowLen := len(table.expectedLineRows)
 		if expectedLineRowLen != actualLineRowLen {
 			t.Errorf("NewFrame: expected %d lines, found %d", expectedLineRowLen, actualLineRowLen)
@@ -65,22 +65,22 @@ func Test_NewFrame(t *testing.T) {
 
 		if table.headers > 0 {
 			expectedRow = table.expectedHeaderRow
-			actualRow = frame.Headers[0].row
+			actualRow = frame.HeaderLines[0].row
 			if expectedRow != actualRow {
-				t.Errorf("NewFrame: expected Headers row to start at %d, but starts at %d", expectedRow, actualRow)
+				t.Errorf("NewFrame: expected HeaderLines row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
 		}
 
 		if table.footers > 0 {
 			expectedRow = table.expectedFooterRow
-			actualRow = frame.Footers[0].row
+			actualRow = frame.FooterLines[0].row
 			if expectedRow != actualRow {
-				t.Errorf("NewFrame: expected Footers row to start at %d, but starts at %d", expectedRow, actualRow)
+				t.Errorf("NewFrame: expected FooterLines row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
 		}
 
 		for idx, expectedRow := range table.expectedLineRows {
-			actualRow = frame.Lines[idx].row
+			actualRow = frame.BodyLines[idx].row
 			if expectedRow != actualRow {
 				t.Errorf("NewFrame: expected line row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
@@ -109,12 +109,12 @@ func Test_Frame_Height(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       10,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		actualHeight := frame.Height()
 		if table.expectedHeight != actualHeight {
@@ -146,16 +146,16 @@ func Test_Frame_IsAtOrPastScreenBottom(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          frameRows,
 			HeaderRows:     0,
 			FooterRows:     0,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		actualResult := frame.IsPastScreenBottom()
 		if table.isAtBottom != actualResult {
-			t.Errorf("Frame.IsPastScreenBottom(): expected result of %v, but found %v (startIdx:%d)", table.isAtBottom, actualResult, frame.StartIdx)
+			t.Errorf("Frame.IsPastScreenBottom(): expected result of %v, but found %v (startIdx:%d)", table.isAtBottom, actualResult, frame.startIdx)
 		}
 
 	}
@@ -187,12 +187,12 @@ func Test_Frame_Append(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          0,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 
 		// append rows...
@@ -206,13 +206,13 @@ func Test_Frame_Append(t *testing.T) {
 		}
 
 		// check if the number of rows matches
-		if len(frame.Lines) != table.appendRows {
-			t.Errorf("Frame.Append(): expected %d number of lines, got %d", table.appendRows, len(frame.Lines))
+		if len(frame.BodyLines) != table.appendRows {
+			t.Errorf("Frame.Append(): expected %d number of lines, got %d", table.appendRows, len(frame.BodyLines))
 		}
 
 		// check the contents of each line
 		for idx := 0; idx < table.appendRows; idx++ {
-			line := frame.Lines[idx]
+			line := frame.BodyLines[idx]
 			actualNum, err := strconv.Atoi(string(line.buffer))
 			if err != nil {
 				t.Errorf("Frame.Append(): expected no error on line read (%v), got %v", actualNum, err)
@@ -225,7 +225,7 @@ func Test_Frame_Append(t *testing.T) {
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
 		for idx, expectedRow := range table.expectedLineRows {
-			actualRow = frame.Lines[idx].row
+			actualRow = frame.BodyLines[idx].row
 			if expectedRow != actualRow {
 				t.Errorf("Frame.Append(): expected line row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
@@ -259,12 +259,12 @@ func Test_Frame_Prepend(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          0,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 
 		// append rows...
@@ -278,14 +278,14 @@ func Test_Frame_Prepend(t *testing.T) {
 		}
 
 		// check if the number of rows matches
-		if len(frame.Lines) != table.prependRows {
-			t.Errorf("Frame.Prepend(): expected %d number of lines, got %d", table.prependRows, len(frame.Lines))
+		if len(frame.BodyLines) != table.prependRows {
+			t.Errorf("Frame.Prepend(): expected %d number of lines, got %d", table.prependRows, len(frame.BodyLines))
 		}
 
 		// check the contents of each line
 		for idx := 0; idx < table.prependRows; idx++ {
 			// note: indexes should be in reverse
-			line := frame.Lines[table.prependRows-idx-1]
+			line := frame.BodyLines[table.prependRows-idx-1]
 			actualNum, err := strconv.Atoi(string(line.buffer))
 			if err != nil {
 				t.Errorf("Frame.Prepend(): expected no error on line read (%v), got %v", actualNum, err)
@@ -298,7 +298,7 @@ func Test_Frame_Prepend(t *testing.T) {
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
 		for idx, expectedRow := range table.expectedLineRows {
-			actualRow = frame.Lines[idx].row
+			actualRow = frame.BodyLines[idx].row
 			if expectedRow != actualRow {
 				t.Errorf("Frame.Prepend(): expected line row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
@@ -327,12 +327,12 @@ func Test_Frame_Insert(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          4,
 			HeaderRows:     table.header,
 			FooterRows:     table.footer,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		finalRows := 5
 		insertIdx := 2
@@ -346,13 +346,13 @@ func Test_Frame_Insert(t *testing.T) {
 		line.buffer = []byte(strconv.Itoa(insertIdx))
 
 		// check if the number of rows matches
-		if len(frame.Lines) != finalRows {
-			t.Errorf("Frame.Insert(): expected %d number of lines, got %d", finalRows, len(frame.Lines))
+		if len(frame.BodyLines) != finalRows {
+			t.Errorf("Frame.Insert(): expected %d number of lines, got %d", finalRows, len(frame.BodyLines))
 		}
 
 		// check the contents of the inserted line
 
-		fetchedLine := frame.Lines[insertIdx]
+		fetchedLine := frame.BodyLines[insertIdx]
 		actualNum, err := strconv.Atoi(string(fetchedLine.buffer))
 		if err != nil {
 			t.Errorf("Frame.Insert(): expected no error on line read (%v), got %v", actualNum, err)
@@ -364,7 +364,7 @@ func Test_Frame_Insert(t *testing.T) {
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
 		for idx, expectedRow := range table.expectedLineRows {
-			actualRow = frame.Lines[idx].row
+			actualRow = frame.BodyLines[idx].row
 			if expectedRow != actualRow {
 				t.Errorf("Frame.Prepend(): expected line row to start at %d, but starts at %d", expectedRow, actualRow)
 			}
@@ -392,31 +392,31 @@ func Test_Frame_Remove(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		rmIdx := 2
 
 		// add content to rows
-		for idx, line := range frame.Lines {
+		for idx, line := range frame.BodyLines {
 			line.buffer = []byte(strconv.Itoa(idx))
 		}
 
 		// Remove a single index
-		frame.Remove(frame.Lines[rmIdx])
+		frame.Remove(frame.BodyLines[rmIdx])
 
 		// check if the number of rows matches
-		if len(frame.Lines) != table.startRows-1 {
-			t.Errorf("Frame.Remove(): expected %d number of lines, got %d", table.startRows, len(frame.Lines))
+		if len(frame.BodyLines) != table.startRows-1 {
+			t.Errorf("Frame.Remove(): expected %d number of lines, got %d", table.startRows, len(frame.BodyLines))
 		}
 
 		// check the contents of each line
 		for idx := 0; idx < table.startRows-1; idx++ {
-			line := frame.Lines[idx]
+			line := frame.BodyLines[idx]
 			actualNum, err := strconv.Atoi(string(line.buffer))
 			if err != nil {
 				t.Errorf("Frame.Remove(): expected no error on line read (%v), got %v", actualNum, err)
@@ -432,7 +432,7 @@ func Test_Frame_Remove(t *testing.T) {
 		// ensure the screen row values are correct relative to the given starting row
 		var actualRow int
 		for idx, expectedRow := range table.expectedLineRows {
-			actualRow = frame.Lines[idx].row
+			actualRow = frame.BodyLines[idx].row
 			if expectedRow != actualRow {
 				t.Errorf("Frame.Remove(): expected line row to start at %d, but starts at %d (idx:%d)", expectedRow, actualRow, idx)
 			}
@@ -460,12 +460,12 @@ func Test_Frame_Clear(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		frame.clear()
 
@@ -505,12 +505,12 @@ func Test_Frame_Close(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
 			startRow:       table.destinationRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		frame.Close()
 
@@ -518,14 +518,14 @@ func Test_Frame_Close(t *testing.T) {
 			t.Errorf("Frame.Close(): [case=%s] expected frame to be closed but is not", test)
 		}
 
-		if table.headers > 0 && !frame.Headers[0].closed {
-			t.Errorf("Frame.Close(): [case=%s] expected Headers to be closed but is not", test)
+		if table.headers > 0 && !frame.HeaderLines[0].closed {
+			t.Errorf("Frame.Close(): [case=%s] expected HeaderLines to be closed but is not", test)
 		}
-		if table.footers > 0 && !frame.Footers[0].closed {
-			t.Errorf("Frame.Close(): [case=%s] expected Footers to be closed but is not", test)
+		if table.footers > 0 && !frame.FooterLines[0].closed {
+			t.Errorf("Frame.Close(): [case=%s] expected FooterLines to be closed but is not", test)
 		}
 
-		for idx, line := range frame.Lines {
+		for idx, line := range frame.BodyLines {
 			if !line.closed {
 				t.Errorf("Frame.Close(): [case=%s] expected line %d to be closed but is not", test, idx)
 			}
@@ -553,17 +553,17 @@ func Test_Frame_Move(t *testing.T) {
 		getScreen().reset()
 
 		frame, _, _, _ := New(Config{
-			test: true,
+			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.header,
 			FooterRows:     table.footer,
 			startRow:       table.startRow,
-			PositionPolicy: PolicyFloatOverflow,
+			PositionPolicy: PolicyOverflow,
 		})
 		frame.Move(table.moveRows)
 
 		expectedFrameRow := table.startRow + table.moveRows
-		actualFrameRow := frame.StartIdx
+		actualFrameRow := frame.startIdx
 		if expectedFrameRow != actualFrameRow {
 			t.Errorf("Frame.Move(): [case=%s] expected frame to be at %d, but is at %d", test, expectedFrameRow, actualFrameRow)
 		}
@@ -571,21 +571,21 @@ func Test_Frame_Move(t *testing.T) {
 		if table.header > 0 {
 
 			expectedFrameRow = table.startRow + table.moveRows
-			actualFrameRow = frame.Headers[0].row
+			actualFrameRow = frame.HeaderLines[0].row
 			if expectedFrameRow != actualFrameRow {
-				t.Errorf("Frame.Move(): [case=%s] expected Headers to be at %d, but is at %d", test, expectedFrameRow, actualFrameRow)
+				t.Errorf("Frame.Move(): [case=%s] expected HeaderLines to be at %d, but is at %d", test, expectedFrameRow, actualFrameRow)
 			}
 		}
 
 		if table.footer > 0 {
 			expectedFrameRow = table.startRow + table.startRows + table.header + table.moveRows
-			actualFrameRow = frame.Footers[0].row
+			actualFrameRow = frame.FooterLines[0].row
 			if expectedFrameRow != actualFrameRow {
-				t.Errorf("Frame.Move(): [case=%s] expected Footers to be at %d, but is at %d", test, expectedFrameRow, actualFrameRow)
+				t.Errorf("Frame.Move(): [case=%s] expected FooterLines to be at %d, but is at %d", test, expectedFrameRow, actualFrameRow)
 			}
 		}
 
-		for idx, line := range frame.Lines {
+		for idx, line := range frame.BodyLines {
 			expectedFrameRow = table.startRow + idx + table.header + table.moveRows
 			actualFrameRow = line.row
 			if expectedFrameRow != actualFrameRow {
@@ -606,7 +606,7 @@ func Test_Frame_Move(t *testing.T) {
 // 			frameHeight := frame.VisibleHeight()
 // 			// offset is how many rows the frame needs to be adjusted to fit on the screen.
 // 			// This is the same as how many rows past the edge of the screen this frame currently is.
-// 			offset := (frame.StartIdx + frameHeight) - terminalHeight
+// 			offset := (frame.startIdx + frameHeight) - terminalHeight
 // 			// offset += 1 // we want to move one line past the frame
 // 			frame.Move(-offset)
 // 			frame.rowAdvancements += offset
@@ -614,7 +614,7 @@ func Test_Frame_Move(t *testing.T) {
 //
 // 		// if the frame has moved above the top of the screen, move it down a bit
 // 		if frame.IsPastScreenTop() {
-// 			offset := -1*frame.StartIdx + 1
+// 			offset := -1*frame.startIdx + 1
 // 			frame.Move(offset)
 // 		}
 // 		return nil
@@ -646,7 +646,7 @@ func Test_Frame_Move(t *testing.T) {
 // 		})
 // 		frame.updateFn = fn
 // 		frame.Update()
-// 		actualResult := frame.StartIdx
+// 		actualResult := frame.startIdx
 // 		if table.adjustedRow != actualResult {
 // 			t.Errorf("Frame.Update(): expected Update row of %d, but is at row %d", table.adjustedRow, actualResult)
 // 		}

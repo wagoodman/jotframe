@@ -7,7 +7,7 @@ import (
 )
 
 var floatFreeDrawTestCases = map[string]drawTestParams{
-	"FloatFree_goCase": {3, 0, 0, 10, PolicyFloatOverflow, 40,
+	"FloatFree_goCase": {3, 0, 0, 10, PolicyOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -20,7 +20,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_Header": {3, 1, 0, 10, PolicyFloatOverflow, 40,
+	"FloatFree_Header": {3, 1, 0, 10, PolicyOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -35,7 +35,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_Footer": {3, 0, 1, 10, PolicyFloatOverflow, 40,
+	"FloatFree_Footer": {3, 0, 1, 10, PolicyOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -50,7 +50,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_HeaderFooter": {3, 1, 1, 10, PolicyFloatOverflow, 40,
+	"FloatFree_HeaderFooter": {3, 1, 1, 10, PolicyOverflow, 40,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 10, value: []byte("")},
@@ -67,7 +67,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 		},
 		[]string{},
 	},
-	"FloatFree_TermHeightSmall_AtTop": {3, 0, 0, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop": {3, 0, 0, 1, PolicyOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -80,7 +80,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=3)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_Header": {3, 1, 0, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_Header": {3, 1, 0, 1, PolicyOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -94,7 +94,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_Footer": {3, 0, 1, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_Footer": {3, 0, 1, 1, PolicyOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -108,7 +108,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=4)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtTop_HeaderFooter": {3, 1, 1, 1, PolicyFloatOverflow, 2,
+	"FloatFree_TermHeightSmall_AtTop_HeaderFooter": {3, 1, 1, 1, PolicyOverflow, 2,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 1, value: []byte("")},
@@ -123,7 +123,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=5)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom": {3, 0, 0, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom": {3, 0, 0, 49, PolicyOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -136,7 +136,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=51)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom_Header": {3, 1, 0, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom_Header": {3, 1, 0, 49, PolicyOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -150,7 +150,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=52)",
 		},
 	},
-	"FloatFree_termHeightSmall_AtBottom_Footer": {3, 0, 1, 49, PolicyFloatOverflow, 50,
+	"FloatFree_termHeightSmall_AtBottom_Footer": {3, 0, 1, 49, PolicyOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -164,7 +164,7 @@ var floatFreeDrawTestCases = map[string]drawTestParams{
 			"line is out of bounds (row=52)",
 		},
 	},
-	"FloatFree_TermHeightSmall_AtBottom_HeaderFooter": {3, 1, 1, 49, PolicyFloatOverflow, 50,
+	"FloatFree_TermHeightSmall_AtBottom_HeaderFooter": {3, 1, 1, 49, PolicyOverflow, 50,
 		[]ScreenEvent{
 			// create the frame (pave a blank spot)
 			{row: 49, value: []byte("")},
@@ -210,13 +210,13 @@ func Test_FloatFreePolicy_Frame_Draw(t *testing.T) {
 			PositionPolicy: table.policy,
 		})
 		if table.headers > 0 {
-			frame.Headers[0].buffer = []byte("theHeader")
+			frame.HeaderLines[0].buffer = []byte("theHeader")
 		}
-		for idx, line := range frame.Lines {
+		for idx, line := range frame.BodyLines {
 			line.buffer = []byte(fmt.Sprintf("LineIdx:%d", idx))
 		}
 		if table.footers > 0 {
-			frame.Footers[0].buffer = []byte("theFooter")
+			frame.FooterLines[0].buffer = []byte("theFooter")
 		}
 		errs = frame.Draw()
 
@@ -258,19 +258,19 @@ func Test_FloatFreePolicy_Frame_AdhocDraw(t *testing.T) {
 			PositionPolicy: table.policy,
 		})
 		if table.headers > 0 {
-			err = frame.Headers[0].WriteString("theHeader")
+			err = frame.HeaderLines[0].WriteString("theHeader")
 			if err != nil {
 				errs = append(errs, err)
 			}
 		}
-		for idx, line := range frame.Lines {
+		for idx, line := range frame.BodyLines {
 			err = line.WriteString(fmt.Sprintf("LineIdx:%d", idx))
 			if err != nil {
 				errs = append(errs, err)
 			}
 		}
 		if table.footers > 0 {
-			err = frame.Footers[0].WriteString("theFooter")
+			err = frame.FooterLines[0].WriteString("theFooter")
 			if err != nil {
 				errs = append(errs, err)
 			}

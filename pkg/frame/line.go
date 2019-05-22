@@ -12,8 +12,11 @@ import (
 type Line struct {
 	id          uuid.UUID
 	buffer      []byte
+	height      int
+	frame       *Frame
 	row         int
 	lock        *sync.Mutex
+	visible     bool
 	closed      bool
 	stale       bool
 	events      chan ScreenEvent
@@ -26,9 +29,12 @@ func NewLine(row int, events chan ScreenEvent) *Line {
 		lock:        getScreen().lock,
 		stale:       true,
 		events:      events,
+		height:      1,
+		visible:     true,
 	}
 }
 
+// todo: the line is blocking on write for all handlers, this should not be the case
 func (line *Line) notify() error {
 	event := newScreenEvent(line)
 	line.events <- *event
@@ -47,6 +53,32 @@ func (line *Line) Id() uuid.UUID {
 
 func (line *Line) Row() int {
 	return line.row
+}
+
+func (line *Line) Hide() {
+	line.lock.Lock()
+	defer line.lock.Unlock()
+
+	line.visible = false
+	line.stale = true
+	line.height = 0
+
+	if line.frame != nil {
+		go line.frame.remove(line, true)
+	}
+}
+
+func (line *Line) Show() {
+	line.lock.Lock()
+	defer line.lock.Unlock()
+	
+	line.visible = true
+	line.stale = true
+	line.height = 1
+
+	if line.frame != nil {
+		go line.frame.insert(line.frame.indexOf(line), true)
+	}
 }
 
 func (line *Line) IsClosed() bool {
@@ -150,9 +182,7 @@ func (line *Line) Open() error {
 }
 
 func (line *Line) open() error {
-	if line.closed {
-		line.closed = false
-	}
+	line.closed = false
 
 	return nil
 }
@@ -165,9 +195,7 @@ func (line *Line) Close() error {
 }
 
 func (line *Line) close() error {
-	if !line.closed {
-		line.closed = true
-	}
+	line.closed = true
 
 	return nil
 }
