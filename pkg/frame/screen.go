@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/k0kubun/go-ansi"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -116,19 +117,19 @@ func (scr *screen) writeAtRow(message string, row int) {
 
 // TODO: this should be written as a frame handler
 func (scr *screen) Run(ctx context.Context) error {
-	// f, err := os.OpenFile("event.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
-	// if err != nil {
-	// 	log.Fatalf("error opening file: %v", err)
-	// }
-	// defer f.Close()
-	//
-	// log.SetOutput(f)
+	f, err := os.OpenFile("event.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case event := <-scr.events:
-			// log.Println(fmt.Sprintf("%d '%s'", event.row, string(event.value)))
+			log.Println(fmt.Sprintf("%d '%s'", event.row, string(event.value)))
 			// clear the row
 			err := setCursorRow(event.row)
 			if err != nil {

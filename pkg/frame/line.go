@@ -55,6 +55,15 @@ func (line *Line) Row() int {
 	return line.row
 }
 
+func (line *Line) Remove() {
+	line.lock.Lock()
+	defer line.lock.Unlock()
+
+	if line.frame != nil {
+		go line.frame.remove(line, false)
+	}
+}
+
 func (line *Line) Hide() {
 	line.lock.Lock()
 	defer line.lock.Unlock()
@@ -77,7 +86,8 @@ func (line *Line) Show() {
 	line.height = 1
 
 	if line.frame != nil {
-		go line.frame.insert(line.frame.indexOf(line), true)
+		_, idx := line.frame.indexOf(line)
+		go line.frame.insert(idx, true)
 	}
 }
 

@@ -13,15 +13,15 @@ func renderLine(idx int, line *frame.Line, fr *frame.Frame) {
 	io.WriteString(line, line.String())
 	time.Sleep(time.Duration(idx+1) * time.Second )
 
-	line.Hide()
+	// line.Hide()
 
 	// line.Close()
 
-	// fr.Remove(line)
+	fr.Remove(line)
 
 
-	time.Sleep(time.Duration((9-idx)*1000 - 400)/2 * time.Millisecond)
-	line.Show()
+	// time.Sleep(time.Duration((9-idx)*1000 - 400)/2 * time.Millisecond)
+	// line.Show()
 
 }
 
@@ -33,7 +33,7 @@ func main() {
 		Lines:          0,
 		HeaderRows:     1,
 		FooterRows:     1,
-		TrailOnRemove:  true,
+		TrailOnRemove:  false,
 		PositionPolicy: frame.PolicyOverflow,
 		ManualDraw:     false,
 	}
@@ -47,6 +47,7 @@ func main() {
 	// fr.FooterLines.Close()
 
 	// concurrently write to each line
+	time.Sleep(time.Duration(1) * time.Second )
 	for idx := 0; idx < totalLines; idx++ {
 		// time.Sleep(time.Duration(200) * time.Millisecond)
 		line, _ := fr.Append()

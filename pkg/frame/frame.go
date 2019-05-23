@@ -6,6 +6,17 @@ import (
 	"sync"
 )
 
+type frameSection int
+
+const (
+	sectionUnknown frameSection = iota
+	sectionHeader
+	sectionBody
+	sectionFooter
+)
+
+var sections = []frameSection{sectionHeader, sectionBody, sectionFooter}
+
 type Frame struct {
 	Config Config
 	lock   *sync.Mutex
@@ -423,16 +434,85 @@ func (frame *Frame) insert(index int, show bool) (*Line, error) {
 	return newLine, nil
 }
 
-func (frame *Frame) indexOf(line *Line) int {
+func (frame *Frame) section(section frameSection) *[]*Line {
+	switch section {
+	case sectionHeader:
+		return &frame.HeaderLines
+	case sectionBody:
+		return &frame.BodyLines
+	case sectionFooter:
+		return &frame.FooterLines
+	default:
+		return nil
+	}
+}
+
+func (frame *Frame) fetch(section frameSection, index int) *Line {
+	if index < 0 {
+		return nil
+	}
+
+	var source = frame.section(section)
+
+	if source == nil || index >= len(*source) {
+		return nil
+	}
+
+	return (*source)[index]
+}
+
+func (frame *Frame) indexOf(line *Line) (frameSection, int) {
 	// find the index of the line object
-	matchedIdx := -1
 	for idx, item := range frame.BodyLines {
 		if item == line {
-			return idx
+			return sectionBody, idx
 		}
 	}
 
-	return matchedIdx
+	for idx, item := range frame.HeaderLines {
+		if item == line {
+			return sectionHeader, idx
+		}
+	}
+
+	for idx, item := range frame.FooterLines {
+		if item == line {
+			return sectionFooter, idx
+		}
+	}
+
+	return sectionUnknown, -1
+}
+
+func (frame *Frame) lastVisibleLineIdx() (frameSection, int) {
+	for secIdx := len(sections)-1; secIdx > 0; secIdx-- {
+		secName := sections[secIdx]
+		section := frame.section(secName)
+		for idx := len(*section) - 1; idx >= 0; idx-- {
+			if (*section)[idx].visible {
+				return secName, idx
+			}
+		}
+	}
+
+	return sectionUnknown, -1
+}
+
+func (frame *Frame) moveAfter(moveAdj int, section frameSection, index int) error {
+	for _, iterSection := range sections {
+		if iterSection < section {
+			continue
+		}
+		source := frame.section(iterSection)
+		var startIdx int
+		if section == iterSection {
+			startIdx = index
+		}
+		for idx := startIdx; idx < len(*source); idx++ {
+			(*source)[idx].move(moveAdj)
+		}
+	}
+	return nil
 }
 
 func (frame *Frame) Remove(line *Line) error {
@@ -449,56 +529,40 @@ func (frame *Frame) remove(line *Line, hide bool) error {
 	}
 
 	// find the index of the line object
-	matchedIdx := frame.indexOf(line)
-
-	if matchedIdx < 0 {
+	section, matchedIdx := frame.indexOf(line)
+	if matchedIdx < 0 || section == sectionUnknown {
 		return fmt.Errorf("could not find line in frame")
 	}
+	source := frame.section(section)
 
-	// BodyLines that are removed must be closed since any further writes will result in line clashes
+	// lines that are removed must be closed since any further writes will result in line clashes
 	if !hide {
-		frame.BodyLines[matchedIdx].close()
+		line.close()
 	}
-	contents := frame.BodyLines[matchedIdx].buffer
+	contents := line.buffer
 
 	// erase the contents of the last line of the Frame, but persist the line buffer
-	lastVisibleFooterLine := -1
-	for idx := len(frame.FooterLines)-1; idx >= 0; idx-- {
-		if frame.FooterLines[idx].visible {
-			lastVisibleFooterLine = idx
-			break
+	if (line.visible && !hide) || hide {
+		lastVisibleLineSection, lastVisibleLineIdx := frame.lastVisibleLineIdx()
+		if lastVisibleLineSection == sectionUnknown || lastVisibleLineIdx < 0 {
+			return fmt.Errorf("frame is empty")
 		}
-	}
-	if lastVisibleFooterLine >= 0 {
-		frame.clearRows = append(frame.clearRows, frame.FooterLines[lastVisibleFooterLine].row)
-	} else {
-		var lastVisibleBodyLine int
-		for idx := len(frame.BodyLines)-1; idx >= 0; idx-- {
-			if frame.BodyLines[idx].visible {
-				lastVisibleBodyLine = idx
-				break
-			}
-		}
-		frame.clearRows = append(frame.clearRows, frame.BodyLines[lastVisibleBodyLine].row)
+		clearRowsSource := frame.section(lastVisibleLineSection)
+
+		frame.clearRows = append(frame.clearRows, (*clearRowsSource)[lastVisibleLineIdx].row)
 	}
 
 	// Remove the line entry from the list
 	if !hide {
-		frame.BodyLines = append(frame.BodyLines[:matchedIdx], frame.BodyLines[matchedIdx+1:]...)
+		*source = append((*source)[:matchedIdx], (*source)[matchedIdx+1:]...)
 	}
 
-
-	// move each line index ahead of the deleted element
-	for idx := matchedIdx; idx < len(frame.BodyLines); idx++ {
-		if hide && idx == matchedIdx {
-			continue
-		}
-		frame.BodyLines[idx].move(-1)
+	// no need to adjust any lines if the line was hidden already
+	if !line.visible && !hide {
+		return nil
 	}
 
-	for _, footer := range frame.FooterLines {
-		footer.move(-1)
-	}
+	frame.moveAfter(-1, section, matchedIdx)
 
 	// apply policies
 	if !hide && frame.Config.TrailOnRemove {
