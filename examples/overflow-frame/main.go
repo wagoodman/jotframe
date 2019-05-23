@@ -13,15 +13,16 @@ func renderLine(idx int, line *frame.Line, fr *frame.Frame) {
 	io.WriteString(line, line.String())
 	time.Sleep(time.Duration(idx+1) * time.Second )
 
-	// line.Hide()
+	line.Hide()
 
 	// line.Close()
 
-	fr.Remove(line)
+	time.Sleep(time.Duration((9-idx)*1000 - 400)/2 * time.Millisecond)
+
+	// fr.Remove(line)
 
 
-	// time.Sleep(time.Duration((9-idx)*1000 - 400)/2 * time.Millisecond)
-	// line.Show()
+	line.Show()
 
 }
 

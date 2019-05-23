@@ -555,6 +555,8 @@ func (frame *Frame) remove(line *Line, hide bool) error {
 	// Remove the line entry from the list
 	if !hide {
 		*source = append((*source)[:matchedIdx], (*source)[matchedIdx+1:]...)
+	} else {
+		matchedIdx++
 	}
 
 	// no need to adjust any lines if the line was hidden already
