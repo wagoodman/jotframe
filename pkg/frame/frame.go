@@ -51,6 +51,8 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 		frame.policy = newOverflowPolicy(frame)
 	case PolicyFloatBottom:
 		frame.policy = newFloatBottomPolicy(frame)
+	case PolicyFloatForward:
+		frame.policy = newFloatForwardPolicy(frame)
 	default:
 		panic(fmt.Errorf("unknown policy: %v", config.PositionPolicy))
 	}

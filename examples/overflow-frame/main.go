@@ -35,7 +35,7 @@ func main() {
 		HeaderRows:     1,
 		FooterRows:     1,
 		TrailOnRemove:  false,
-		PositionPolicy: frame.PolicyFloatBottom,
+		PositionPolicy: frame.PolicyFloatForward,
 		ManualDraw:     false,
 	}
 	fr, _, _, _ := frame.New(config)

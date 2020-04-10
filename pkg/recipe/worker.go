@@ -35,7 +35,7 @@ func (wq *WorkQueue) Work() {
 		HeaderRows:     0,
 		FooterRows:     0,
 		TrailOnRemove:  true,
-		PositionPolicy: frame.PolicyFloatForwardTrail,
+		PositionPolicy: frame.PolicyFloatForward,
 		ManualDraw:     false,
 	})
 
