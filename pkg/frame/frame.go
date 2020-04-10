@@ -53,6 +53,8 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 		frame.policy = newFloatBottomPolicy(frame)
 	case PolicyFloatForward:
 		frame.policy = newFloatForwardPolicy(frame)
+	case PolicyFloatTop:
+		frame.policy = newFloatTopPolicy(frame)
 	default:
 		panic(fmt.Errorf("unknown policy: %v", config.PositionPolicy))
 	}
