@@ -40,10 +40,7 @@ type Policy interface {
 
 	// proactive actions (admission)
 	onInit() // direct the start row for the frame (before initializing lines or drawing)
-	isAllowedMotion(rows int) int
+	allowedMotion(rows int) int
 	isAllowedTrail() bool
 }
 
-type simplePolicy struct {
-	Frame *Frame
-}

@@ -1,6 +1,8 @@
 package frame
 
-type policyOverflow simplePolicy
+type policyOverflow struct {
+	Frame *Frame
+}
 
 func newOverflowPolicy(frame *Frame) *policyOverflow {
 	return &policyOverflow{
@@ -33,7 +35,7 @@ func (policy *policyOverflow) onTrail() {
 	}
 }
 
-func (policy *policyOverflow) isAllowedMotion(rows int) int {
+func (policy *policyOverflow) allowedMotion(rows int) int {
 	return rows
 }
 

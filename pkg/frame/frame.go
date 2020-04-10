@@ -49,6 +49,8 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 	switch config.PositionPolicy {
 	case PolicyOverflow:
 		frame.policy = newOverflowPolicy(frame)
+	case PolicyFloatBottom:
+		frame.policy = newFloatBottomPolicy(frame)
 	default:
 		panic(fmt.Errorf("unknown policy: %v", config.PositionPolicy))
 	}
@@ -660,7 +662,7 @@ func (frame *Frame) IsClosed() bool {
 }
 
 func (frame *Frame) Move(rows int) {
-	motion := frame.policy.isAllowedMotion(rows)
+	motion := frame.policy.allowedMotion(rows)
 	if motion == 0 {
 		return
 	}
