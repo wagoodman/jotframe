@@ -38,7 +38,10 @@ func main() {
 		PositionPolicy: frame.PolicyFloatTop,
 		ManualDraw:     false,
 	}
-	fr, _, _, _ := frame.New(config)
+	fr, err := frame.New(config)
+	if err != nil {
+		panic(err)
+	}
 
 	// add a header and footer
 	fr.HeaderLines[0].WriteString("This is the best header ever!")

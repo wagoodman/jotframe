@@ -37,7 +37,7 @@ type Frame struct {
 	stale       bool
 }
 
-func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
+func New(config Config) (*Frame, error) {
 	frame := &Frame{
 		startIdx: config.startRow,
 		Config:   config,
@@ -81,7 +81,7 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 	if !config.test {
 		err := getScreen().register(frame)
 		if err != nil {
-			return nil, err, nil, nil
+			return nil, err
 		}
 	}
 
@@ -90,13 +90,12 @@ func New(config Config) (*Frame, error, context.Context, context.CancelFunc) {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 
-	ctx, cancel := context.WithCancel(context.Background())
 	if !config.test {
-		go getScreen().Run(ctx)
+		go getScreen().Run(context.Background())
 	}
 	frame.draw()
 
-	return frame, nil, ctx, cancel
+	return frame, nil
 }
 
 func (frame *Frame) newLine(rowIdx int) *Line {
