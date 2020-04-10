@@ -1,5 +1,7 @@
 module github.com/wagoodman/jotframe
 
+go 1.14
+
 require (
 	github.com/google/uuid v1.1.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
