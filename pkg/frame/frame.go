@@ -764,9 +764,9 @@ func (frame *Frame) draw() (errs []error) {
 		}
 	}
 
-	// if frame.IsClosed() {
-	// 	setCursorRow(frame.startIdx + frame.Height())
-	// }
+	if frame.IsClosed() {
+		setCursorRow(frame.startIdx + frame.Height())
+	}
 
 	return errs
 }
