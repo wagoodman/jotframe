@@ -542,7 +542,10 @@ func (frame *Frame) remove(line *Line, hide bool) error {
 
 	// lines that are removed must be closed since any further writes will result in line clashes
 	if !hide {
-		line.close()
+		err := line.close()
+		if err != nil {
+			return err
+		}
 	}
 	contents := line.buffer
 
@@ -569,7 +572,10 @@ func (frame *Frame) remove(line *Line, hide bool) error {
 		return nil
 	}
 
-	frame.moveAfter(-1, section, matchedIdx)
+	err := frame.moveAfter(-1, section, matchedIdx)
+	if err != nil {
+		return err
+	}
 
 	// apply policies
 	if !hide && frame.Config.TrailOnRemove {
@@ -610,34 +616,43 @@ func (frame *Frame) clear() {
 	}
 }
 
-func (frame *Frame) Close() {
+func (frame *Frame) Close() error {
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
-	frame.close()
-	// frame.policy.onClose()
-
-	// todo: make this a screen write, starting at the last line of the frame and inserting a
-	// newline char with the screen loop (should we kill the screen loop afterwards?)
-	fmt.Println()
-
+	err := frame.close()
+	if err != nil {
+		return err
+	}
 
 	frame.draw()
+	return nil
 }
 
-func (frame *Frame) close() {
+func (frame *Frame) close() error {
+	var err error
 	for _, header := range frame.HeaderLines {
-		header.close()
+		err = header.close()
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, line := range frame.BodyLines {
-		line.close()
+		err = line.close()
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, footer := range frame.FooterLines {
-		footer.close()
+		err = footer.close()
+		if err != nil {
+			return err
+		}
 	}
 
 	frame.closed = true
+	return nil
 }
 
 // todo: I think this should be decided by the user via a Close() action, not by the indication of closed lines

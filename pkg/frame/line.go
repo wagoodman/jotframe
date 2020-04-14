@@ -55,16 +55,20 @@ func (line *Line) Row() int {
 	return line.row
 }
 
-func (line *Line) Remove() {
+func (line *Line) Remove() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
 
 	if line.frame != nil {
-		go line.frame.remove(line, false)
+		err := line.frame.remove(line, false)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (line *Line) Hide() {
+func (line *Line) Hide() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
 
@@ -73,11 +77,15 @@ func (line *Line) Hide() {
 	line.height = 0
 
 	if line.frame != nil {
-		go line.frame.remove(line, true)
+		err := line.frame.remove(line, true)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (line *Line) Show() {
+func (line *Line) Show() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
 	
@@ -87,8 +95,12 @@ func (line *Line) Show() {
 
 	if line.frame != nil {
 		_, idx := line.frame.indexOf(line)
-		go line.frame.insert(idx, true)
+		_, err := line.frame.insert(idx, true)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (line *Line) IsClosed() bool {
@@ -164,24 +176,34 @@ func (line *Line) write(buff []byte) (int, error) {
 
 func (line *Line) WriteStringAndClose(str string) (int, error) {
 	// WriteString already uses Draw() which will implicitly lock
-	defer line.close()
-	return io.WriteString(line, str)
+	numBytes, err :=  io.WriteString(line, str)
+	if err != nil {
+		return -1, err
+	}
+	return numBytes, line.close()
 }
 
 func (line *Line) WriteAndClose(buff []byte) (int, error) {
 	line.lock.Lock()
 	defer line.lock.Unlock()
 
-	defer line.close()
-	return line.write(buff)
+	numBytes, err := line.write(buff)
+	if err != nil {
+		return -1, err
+	}
+
+	return numBytes, line.close()
 }
 
 func (line *Line) ClearAndClose() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
 
-	defer line.close()
-	return line.clear(false)
+	err := line.clear(false)
+	if err != nil {
+		return err
+	}
+	return line.close()
 }
 
 func (line *Line) Open() error {

@@ -11,13 +11,13 @@ func renderLine(idx int, line *frame.Line, fr *frame.Frame) {
 
 
 	io.WriteString(line, line.String())
-	time.Sleep(time.Duration(idx+1) * time.Second )
+	time.Sleep(time.Duration((idx+1)*100) * time.Millisecond + 1*time.Second )
 
 	line.Hide()
 
 	// line.Close()
 
-	time.Sleep(time.Duration((9-idx)*1000 - 400)/2 * time.Millisecond)
+	time.Sleep(time.Duration((idx+1)*100) * time.Millisecond + 1*time.Second)
 
 	// fr.Remove(line)
 
@@ -51,9 +51,9 @@ func main() {
 	// fr.FooterLines.Close()
 
 	// concurrently write to each line
-	time.Sleep(time.Duration(1) * time.Second )
+	time.Sleep(200 * time.Millisecond)
 	for idx := 0; idx < totalLines; idx++ {
-		// time.Sleep(time.Duration(200) * time.Millisecond)
+		time.Sleep(time.Duration(90) * time.Millisecond)
 		line, _ := fr.Append()
 		// go renderLine(idx, fr.BodyLines[idx], fr)
 		go renderLine(idx, line, fr)
@@ -90,7 +90,7 @@ func main() {
 	// }
 	// footer3.WriteString("prepend footer")
 
-	time.Sleep(time.Duration(10 * time.Second))
+	time.Sleep(time.Duration(5 * time.Second))
 
 	// close the frame
 	fr.Close()
