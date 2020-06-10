@@ -15,18 +15,20 @@ var (
 )
 
 type screen struct {
-	lock     *sync.RWMutex
-	events   chan ScreenEvent
-	frames   []*Frame
-	handlers []EventHandler
-	closed   bool
-	workers  *sync.WaitGroup
+	lock      *sync.RWMutex
+	closeLock *sync.RWMutex
+	events    chan ScreenEvent
+	frames    []*Frame
+	handlers  []EventHandler
+	closed    bool
+	workers   *sync.WaitGroup
 }
 
 func getScreen() *screen {
 	screenSync.Do(func() {
 		theScr = &screen{
-			lock: &sync.RWMutex{},
+			lock:      &sync.RWMutex{},
+			closeLock: &sync.RWMutex{},
 		}
 		theScr.reset()
 	})
@@ -66,8 +68,8 @@ func (scr *screen) refresh() error {
 }
 
 func (scr *screen) Close() error {
-	scr.lock.Lock()
-	defer scr.lock.Unlock()
+	scr.closeLock.Lock()
+	defer scr.closeLock.Unlock()
 
 	for _, frame := range scr.frames {
 		frame.close()
@@ -90,8 +92,8 @@ func (scr *screen) Close() error {
 }
 
 func (scr *screen) advance(rows int) {
-	scr.lock.RLock()
-	defer scr.lock.RUnlock()
+	scr.closeLock.RLock()
+	defer scr.closeLock.RUnlock()
 
 	if !scr.closed {
 		scr.events <- ScreenEvent{
@@ -102,8 +104,8 @@ func (scr *screen) advance(rows int) {
 }
 
 func (scr *screen) writeAtRow(message string, row int) {
-	scr.lock.RLock()
-	defer scr.lock.RUnlock()
+	scr.closeLock.RLock()
+	defer scr.closeLock.RUnlock()
 
 	if !scr.closed {
 		scr.events <- ScreenEvent{
