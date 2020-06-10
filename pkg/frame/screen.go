@@ -67,6 +67,10 @@ func (scr *screen) refresh() error {
 	return nil
 }
 
+func Close() error {
+	return getScreen().Close()
+}
+
 func (scr *screen) Close() error {
 	scr.closeLock.Lock()
 	defer scr.closeLock.Unlock()
