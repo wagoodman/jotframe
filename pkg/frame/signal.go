@@ -3,10 +3,11 @@
 package frame
 
 import (
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -37,12 +38,11 @@ func pollSignals() {
 	for {
 		select {
 		case <-sigwinch:
+			scr := getScreen()
 			terminalWidth, terminalHeight = getTerminalSize()
-			lock := getScreen().lock
+			lock := scr.lock
 			lock.Lock()
-			// the screen may have a trail, which is unmanaged at this point. Don't clear the screen
-			// clearScreen()
-			getScreen().refresh()
+			scr.refresh()
 			lock.Unlock()
 		}
 	}

@@ -30,7 +30,7 @@ func (wq *WorkQueue) AddWork(work interface{}) {
 }
 
 func (wq *WorkQueue) Work() {
-	fr, _, _, _ := frame.New(frame.Config{
+	fr, _ := frame.New(frame.Config{
 		Lines:          0,
 		HeaderRows:     0,
 		FooterRows:     0,

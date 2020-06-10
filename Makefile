@@ -3,6 +3,9 @@ all: clean
 run:
 	go run examples/download/main.go
 
+lint:
+	golangci-lint run --tests=false
+
 test:
 	go test -cover -v ./...
 

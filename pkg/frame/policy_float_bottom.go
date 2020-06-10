@@ -1,11 +1,10 @@
 package frame
 
 type policyFloatBottom struct {
-	Frame *Frame
+	Frame       *Frame
 	largestSize int
 	currentSize int
 }
-
 
 func newFloatBottomPolicy(frame *Frame) *policyFloatBottom {
 	return &policyFloatBottom{
@@ -46,7 +45,6 @@ func (policy *policyFloatBottom) onResize(adjustment int) {
 	if policy.currentSize > policy.largestSize {
 		policy.largestSize = policy.currentSize
 	}
-
 }
 
 // reactive policy!

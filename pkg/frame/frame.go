@@ -1,7 +1,6 @@
 package frame
 
 import (
-	"context"
 	"fmt"
 	"sync"
 )
@@ -19,7 +18,7 @@ var sections = []frameSection{sectionHeader, sectionBody, sectionFooter}
 
 type Frame struct {
 	Config Config
-	lock   *sync.Mutex
+	lock   *sync.RWMutex
 
 	startIdx    int
 	HeaderLines []*Line
@@ -30,20 +29,21 @@ type Frame struct {
 	trailRows       []string
 	rowAdvancements int
 
-	events      chan ScreenEvent
-	policy      Policy
-	autoDraw    bool
-	closed      bool
-	stale       bool
+	events   chan ScreenEvent
+	policy   Policy
+	autoDraw bool
+	closed   bool
+	stale    bool
 }
 
 func New(config Config) (*Frame, error) {
+	scr := getScreen()
 	frame := &Frame{
 		startIdx: config.startRow,
 		Config:   config,
-		lock:     getScreen().lock,
+		lock:     scr.lock,
 		autoDraw: !config.ManualDraw,
-		events:   getScreen().events,
+		events:   scr.events,
 	}
 
 	switch config.PositionPolicy {
@@ -63,7 +63,6 @@ func New(config Config) (*Frame, error) {
 	frame.policy.onInit()
 
 	for idx := 0; idx < config.HeaderRows; idx++ {
-		// todo: should headers have closeSignal waitGroups? or should they be nil?
 		line := NewLine(frame.startIdx+idx, frame.events)
 		frame.HeaderLines = append(frame.HeaderLines, line)
 	}
@@ -72,26 +71,20 @@ func New(config Config) (*Frame, error) {
 		frame.BodyLines = append(frame.BodyLines, line)
 	}
 	for idx := 0; idx < config.FooterRows; idx++ {
-		// todo: should footers have closeSignal waitGroups? or should they be nil?
 		line := NewLine(frame.startIdx+config.HeaderRows+config.Lines+idx, frame.events)
 		frame.FooterLines = append(frame.FooterLines, line)
 	}
 
 	// register frame before drawing to screen
 	if !config.test {
-		err := getScreen().register(frame)
+		err := scr.register(frame)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// todo: it's bad that the constructor is writing out to the screen... is it avoidable?
-	// adjust the screen such that a known good starting condition is in place
-	frame.lock.Lock()
-	defer frame.lock.Unlock()
-
 	if !config.test {
-		go getScreen().Run(context.Background())
+		scr.Run()
 	}
 	frame.draw()
 
@@ -121,7 +114,7 @@ func (frame *Frame) appendTrail(str string) {
 	frame.trailRows = append(frame.trailRows, str)
 	frame.policy.onTrail()
 
-	// todo: what about update/draw here?
+	// TODO: what about update/draw here?
 }
 
 func (frame *Frame) visibleBodyLines() int {
@@ -148,7 +141,6 @@ func (frame *Frame) visibleFooterLines() int {
 	return height
 }
 
-
 func (frame *Frame) Height() int {
 	return frame.visibleBodyLines() + frame.visibleFooterLines() + frame.visibleHeaderLines()
 }
@@ -161,7 +153,6 @@ func (frame *Frame) VisibleHeight() int {
 		return forwardDrawArea
 	}
 	return height
-
 }
 
 func (frame *Frame) resetAdvancements() {
@@ -261,7 +252,6 @@ func (frame *Frame) AppendFooter() (*Line, error) {
 	return newLine, nil
 }
 
-
 func (frame *Frame) Append() (*Line, error) {
 	if frame.IsClosed() {
 		return nil, fmt.Errorf("frame is closed")
@@ -279,7 +269,6 @@ func (frame *Frame) Append() (*Line, error) {
 		if frame.HeaderLines != nil {
 			rowIdx += 1
 		}
-
 	}
 
 	newLine := frame.newLine(rowIdx)
@@ -350,7 +339,6 @@ func (frame *Frame) PrependFooter() (*Line, error) {
 	}
 
 	frame.FooterLines = append([]*Line{newLine}, frame.FooterLines...)
-
 
 	frame.policy.onResize(1)
 
@@ -490,7 +478,7 @@ func (frame *Frame) indexOf(line *Line) (frameSection, int) {
 }
 
 func (frame *Frame) lastVisibleLineIdx() (frameSection, int) {
-	for secIdx := len(sections)-1; secIdx > 0; secIdx-- {
+	for secIdx := len(sections) - 1; secIdx > 0; secIdx-- {
 		secName := sections[secIdx]
 		section := frame.section(secName)
 		for idx := len(*section) - 1; idx >= 0; idx-- {
@@ -521,7 +509,6 @@ func (frame *Frame) moveAfter(moveAdj int, section frameSection, index int) erro
 }
 
 func (frame *Frame) Remove(line *Line) error {
-
 	frame.lock.Lock()
 	defer frame.lock.Unlock()
 
@@ -720,6 +707,7 @@ func (frame *Frame) Draw() (errs []error) {
 }
 
 func (frame *Frame) draw() (errs []error) {
+	scr := getScreen()
 	errs = make([]error, 0)
 
 	// clear any marked lines (preserving the buffer) while these indexes still exist
@@ -733,9 +721,9 @@ func (frame *Frame) draw() (errs []error) {
 
 	// advance the screen while adding any trail lines
 	for idx := 0; idx < frame.rowAdvancements; idx++ {
-		getScreen().advance(1)
+		scr.advance(1)
 		if idx < len(frame.trailRows) {
-			getScreen().writeAtRow(frame.trailRows[0], frame.startIdx-len(frame.trailRows)+idx)
+			scr.writeAtRow(frame.trailRows[0], frame.startIdx-len(frame.trailRows)+idx)
 			if len(frame.trailRows) >= 1 {
 				frame.trailRows = frame.trailRows[1:]
 			} else {
@@ -747,7 +735,7 @@ func (frame *Frame) draw() (errs []error) {
 
 	// append any remaining trail rows
 	for idx, message := range frame.trailRows {
-		getScreen().writeAtRow(message, frame.startIdx-len(frame.trailRows)+idx)
+		scr.writeAtRow(message, frame.startIdx-len(frame.trailRows)+idx)
 	}
 	frame.trailRows = make([]string, 0)
 
@@ -785,4 +773,3 @@ func (frame *Frame) draw() (errs []error) {
 
 	return errs
 }
-

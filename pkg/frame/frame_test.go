@@ -34,7 +34,7 @@ func Test_NewFrame(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
@@ -86,7 +86,6 @@ func Test_NewFrame(t *testing.T) {
 			}
 		}
 
-
 	}
 
 }
@@ -108,7 +107,7 @@ func Test_Frame_Height(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
@@ -145,7 +144,7 @@ func Test_Frame_IsAtOrPastScreenBottom(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          frameRows,
 			HeaderRows:     0,
@@ -186,7 +185,7 @@ func Test_Frame_Append(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          0,
 			HeaderRows:     table.headers,
@@ -258,7 +257,7 @@ func Test_Frame_Prepend(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          0,
 			HeaderRows:     table.headers,
@@ -326,7 +325,7 @@ func Test_Frame_Insert(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          4,
 			HeaderRows:     table.header,
@@ -391,7 +390,7 @@ func Test_Frame_Remove(t *testing.T) {
 	for _, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
@@ -459,7 +458,7 @@ func Test_Frame_Clear(t *testing.T) {
 	for test, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
@@ -504,7 +503,7 @@ func Test_Frame_Close(t *testing.T) {
 	for test, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.headers,
@@ -552,7 +551,7 @@ func Test_Frame_Move(t *testing.T) {
 	for test, table := range tables {
 		getScreen().reset()
 
-		frame, _, _, _ := New(Config{
+		frame, _ := New(Config{
 			test:           true,
 			Lines:          table.startRows,
 			HeaderRows:     table.header,

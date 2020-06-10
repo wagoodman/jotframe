@@ -5,11 +5,12 @@ package frame
 import (
 	"bufio"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // todo: will this be supported on windows?... https://github.com/nsf/termbox-go/blob/master/termbox_windows.go
@@ -62,7 +63,6 @@ func GetCursorRow() (int, error) {
 		if err != nil {
 			return -1, fmt.Errorf("invalid row value: '%s'", line)
 		}
-
 	} else {
 		return -1, fmt.Errorf("unable to fetch position")
 	}

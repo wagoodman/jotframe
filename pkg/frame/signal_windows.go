@@ -18,14 +18,12 @@ func getTerminalSize() (int, int) {
 
 func pollSignals() {
 
-	// poll window size (how do you so this event)
+	// TODO: is there a way to make this event driven?
 	for {
 		terminalWidth, terminalHeight = getTerminalSize()
 
 		lock := getScreenLock()
 		lock.Lock()
-		// the screen may have a trail, which is unmanaged at this point. Don't clear the screen
-		// clearScreen()
 		refresh()
 		lock.Unlock()
 

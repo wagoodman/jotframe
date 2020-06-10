@@ -4,7 +4,6 @@ type floatForwardPolicy struct {
 	Frame *Frame
 }
 
-
 func newFloatForwardPolicy(frame *Frame) *floatForwardPolicy {
 	return &floatForwardPolicy{
 		Frame: frame,

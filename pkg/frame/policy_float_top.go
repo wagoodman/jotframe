@@ -4,7 +4,6 @@ type floatTopPolicy struct {
 	Frame *Frame
 }
 
-
 func newFloatTopPolicy(frame *Frame) *floatTopPolicy {
 	return &floatTopPolicy{
 		Frame: frame,

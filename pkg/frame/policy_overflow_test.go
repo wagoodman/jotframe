@@ -201,8 +201,8 @@ func Test_FloatFreePolicy_Frame_Draw(t *testing.T) {
 
 		// run test...
 		var errs []error
-		frame, _, _, _ := New(Config{
-			test: true,
+		frame, _ := New(Config{
+			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
@@ -222,7 +222,6 @@ func Test_FloatFreePolicy_Frame_Draw(t *testing.T) {
 
 		// assert results...
 		validateEvents(t, test, table, errs, frame, handler)
-
 
 	}
 
@@ -249,8 +248,8 @@ func Test_FloatFreePolicy_Frame_AdhocDraw(t *testing.T) {
 		// run test...
 		var err error
 		var errs = make([]error, 0)
-		frame, _, _, _ := New(Config{
-			test: true,
+		frame, _ := New(Config{
+			test:           true,
 			Lines:          table.rows,
 			HeaderRows:     table.headers,
 			FooterRows:     table.footers,
@@ -278,7 +277,6 @@ func Test_FloatFreePolicy_Frame_AdhocDraw(t *testing.T) {
 
 		// assert results...
 		validateEvents(t, test, table, errs, frame, handler)
-
 
 	}
 

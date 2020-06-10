@@ -10,38 +10,40 @@ import (
 )
 
 type Line struct {
-	id          uuid.UUID
-	buffer      []byte
-	height      int
-	frame       *Frame
-	row         int
-	lock        *sync.Mutex
-	visible     bool
-	closed      bool
-	stale       bool
-	events      chan ScreenEvent
+	id      uuid.UUID
+	buffer  []byte
+	height  int
+	frame   *Frame
+	row     int
+	lock    *sync.RWMutex
+	visible bool
+	closed  bool
+	stale   bool
+	events  chan ScreenEvent
 }
 
 func NewLine(row int, events chan ScreenEvent) *Line {
 	return &Line{
-		id:          uuid.New(),
-		row:         row,
-		lock:        getScreen().lock,
-		stale:       true,
-		events:      events,
-		height:      1,
-		visible:     true,
+		id:      uuid.New(),
+		row:     row,
+		lock:    getScreen().lock,
+		stale:   true,
+		events:  events,
+		height:  1,
+		visible: true,
 	}
 }
 
 // todo: the line is blocking on write for all handlers, this should not be the case
 func (line *Line) notify() error {
+	scr := getScreen()
+
 	event := newScreenEvent(line)
 	line.events <- *event
-	if len(getScreen().handlers) == 0 {
+	if len(scr.handlers) == 0 {
 		return nil
 	}
-	for _, handler := range getScreen().handlers {
+	for _, handler := range scr.handlers {
 		handler.onEvent(event)
 	}
 	return nil
@@ -88,7 +90,7 @@ func (line *Line) Hide() error {
 func (line *Line) Show() error {
 	line.lock.Lock()
 	defer line.lock.Unlock()
-	
+
 	line.visible = true
 	line.stale = true
 	line.height = 1
@@ -176,7 +178,7 @@ func (line *Line) write(buff []byte) (int, error) {
 
 func (line *Line) WriteStringAndClose(str string) (int, error) {
 	// WriteString already uses Draw() which will implicitly lock
-	numBytes, err :=  io.WriteString(line, str)
+	numBytes, err := io.WriteString(line, str)
 	if err != nil {
 		return -1, err
 	}

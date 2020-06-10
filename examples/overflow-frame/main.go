@@ -1,26 +1,25 @@
 package main
 
 import (
-	"github.com/wagoodman/jotframe/pkg/frame"
 	"io"
 	"math/rand"
 	"time"
+
+	"github.com/wagoodman/jotframe/pkg/frame"
 )
 
 func renderLine(idx int, line *frame.Line, fr *frame.Frame) {
 
-
 	io.WriteString(line, line.String())
-	time.Sleep(time.Duration((idx+1)*100) * time.Millisecond + 1*time.Second )
+	time.Sleep(time.Duration((idx+1)*100)*time.Millisecond + 1*time.Second)
 
 	line.Hide()
 
 	// line.Close()
 
-	time.Sleep(time.Duration((idx+1)*100) * time.Millisecond + 1*time.Second)
+	time.Sleep(time.Duration((idx+1)*100)*time.Millisecond + 1*time.Second)
 
 	// fr.Remove(line)
-
 
 	line.Show()
 
@@ -59,7 +58,6 @@ func main() {
 		go renderLine(idx, line, fr)
 	}
 
-
 	// time.Sleep(time.Duration(700 * time.Millisecond))
 	// header2, err := fr.AppendHeader()
 	// if err != nil{
@@ -94,5 +92,4 @@ func main() {
 
 	// close the frame
 	fr.Close()
-
 }
