@@ -2,6 +2,7 @@ package frame
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"sync"
@@ -22,6 +23,7 @@ type screen struct {
 	handlers  []EventHandler
 	closed    bool
 	workers   *sync.WaitGroup
+	output    io.Writer
 }
 
 func getScreen() *screen {
@@ -29,10 +31,15 @@ func getScreen() *screen {
 		theScr = &screen{
 			lock:      &sync.RWMutex{},
 			closeLock: &sync.RWMutex{},
+			output:    os.Stdout,
 		}
 		theScr.reset()
 	})
 	return theScr
+}
+
+func (scr *screen) setWriter(writer io.Writer) {
+	scr.output = writer
 }
 
 func (scr *screen) reset() {
@@ -138,7 +145,7 @@ func (scr *screen) Run() {
 			ansi.CursorHorizontalAbsolute(0)
 
 			// write the output
-			_, err = os.Stdout.Write(event.value)
+			_, err = scr.output.Write(event.value)
 			if err != nil {
 				fmt.Printf("failed to write payload: %s\n", err)
 				scr.closed = true

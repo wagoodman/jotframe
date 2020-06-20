@@ -38,6 +38,11 @@ type Frame struct {
 
 func New(config Config) (*Frame, error) {
 	scr := getScreen()
+
+	if config.Output != nil {
+		scr.setWriter(config.Output)
+	}
+
 	frame := &Frame{
 		startIdx: config.startRow,
 		Config:   config,
