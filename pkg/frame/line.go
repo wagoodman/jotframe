@@ -169,8 +169,11 @@ func (line *Line) write(buff []byte) (int, error) {
 
 	line.buffer = []byte(strings.Split(string(buff), lineBreak)[0])
 
-	if line.row < 0 || line.row > terminalHeight {
-		return -1, fmt.Errorf("line is out of bounds (row=%d)", line.row)
+	// only enforce terminal bounds checking when we positively know the terminal size
+	if terminalHeight > -1 {
+		if line.row < 0 || line.row > terminalHeight {
+			return -1, fmt.Errorf("line is out of bounds (row=%d)", line.row)
+		}
 	}
 
 	return len(line.buffer), line.notify()

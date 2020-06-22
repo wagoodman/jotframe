@@ -10,8 +10,11 @@ var (
 )
 
 func init() {
-	// fetch initial values
-	terminalWidth, terminalHeight = getTerminalSize()
+	updateScreenDimensions()
 
 	go pollSignals()
+}
+
+func updateScreenDimensions() {
+	terminalWidth, terminalHeight = getTerminalSize()
 }

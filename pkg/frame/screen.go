@@ -2,12 +2,9 @@ package frame
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/k0kubun/go-ansi"
 )
 
 var (
@@ -23,7 +20,7 @@ type screen struct {
 	handlers  []EventHandler
 	closed    bool
 	workers   *sync.WaitGroup
-	output    io.Writer
+	output    *os.File
 }
 
 func getScreen() *screen {
@@ -38,8 +35,10 @@ func getScreen() *screen {
 	return theScr
 }
 
-func (scr *screen) setWriter(writer io.Writer) {
+func (scr *screen) setWriter(writer *os.File) {
 	scr.output = writer
+	// now there is a different fd which to ask for screen dimensions from
+	updateScreenDimensions()
 }
 
 func (scr *screen) reset() {
@@ -141,8 +140,20 @@ func (scr *screen) Run() {
 				scr.closed = true
 				return
 			}
-			ansi.EraseInLine(2)
-			ansi.CursorHorizontalAbsolute(0)
+			// erase line (set mode=2)
+			_, err = fmt.Fprintf(scr.output, "\x1b[%dK", 2)
+			if err != nil {
+				fmt.Printf("failed to erase line: %s\n", err)
+				scr.closed = true
+				return
+			}
+			// set cursor horizontal absolute position to 0
+			_, err = fmt.Fprintf(scr.output, "\x1b[%dG", 0)
+			if err != nil {
+				fmt.Printf("failed to set horizontal position: %s\n", err)
+				scr.closed = true
+				return
+			}
 
 			// write the output
 			_, err = scr.output.Write(event.value)

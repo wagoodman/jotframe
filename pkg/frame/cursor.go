@@ -27,26 +27,31 @@ func setCursorRow(row int) error {
 
 	// sets the cursor position where subsequent text will begin: <ESC>[{ROW};{COLUMN}H
 	// great resource: http://www.termsys.demon.co.uk/vtansi.htm
-	fmt.Printf("\x1b[%d;0H", row)
-	return nil
+	_, err := fmt.Fprintf(getScreen().output, "\x1b[%d;0H", row)
+	return err
 }
 
 // todo: will this be supported on windows?... https://github.com/nsf/termbox-go/blob/master/termbox_windows.go
 // currently assumed VT100 compatible emulator
 func GetCursorRow() (int, error) {
 	var row int
-	oldState, err := terminal.MakeRaw(0)
+	scr := getScreen()
+	fd := int(scr.output.Fd())
+	oldState, err := terminal.MakeRaw(fd)
 	if err != nil {
 		return -1, err
 	}
-	defer terminal.Restore(0, oldState)
+	defer terminal.Restore(fd, oldState)
 
 	// capture keyboard output from echo
 	reader := bufio.NewReader(os.Stdin)
 
 	// request a "Report Cursor Position" response from the device: <ESC>[{ROW};{COLUMN}R
 	// great resource: http://www.termsys.demon.co.uk/vtansi.htm
-	fmt.Print("\x1b[6n")
+	_, err = fmt.Fprint(scr.output, "\x1b[6n")
+	if err != nil {
+		return -1, fmt.Errorf("unable to get screen position")
+	}
 
 	// capture the response up until the expected "R"
 	text, err := reader.ReadSlice('R')

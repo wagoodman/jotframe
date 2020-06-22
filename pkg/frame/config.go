@@ -1,6 +1,8 @@
 package frame
 
-import "io"
+import (
+	"os"
+)
 
 type Config struct {
 	test           bool
@@ -11,7 +13,7 @@ type Config struct {
 	TrailOnRemove  bool
 	PositionPolicy PositionPolicy
 	ManualDraw     bool
-	Output         io.Writer
+	Output         *os.File
 }
 
 func (config *Config) VisibleHeight() int {

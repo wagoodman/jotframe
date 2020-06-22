@@ -26,7 +26,7 @@ func GetTerminalSize() (int, int) {
 }
 
 func getTerminalSize() (int, int) {
-	termWidth, termHeight, _ := terminal.GetSize(int(os.Stdout.Fd()))
+	termWidth, termHeight, _ := terminal.GetSize(int(getScreen().output.Fd()))
 	return termWidth, termHeight
 }
 

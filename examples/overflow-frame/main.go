@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/wagoodman/jotframe/pkg/frame"
@@ -36,6 +37,7 @@ func main() {
 		TrailOnRemove:  false,
 		PositionPolicy: frame.PolicyFloatTop,
 		ManualDraw:     false,
+		Output: os.Stderr,
 	}
 	fr, err := frame.New(config)
 	if err != nil {
