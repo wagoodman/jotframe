@@ -616,7 +616,6 @@ func (frame *Frame) Close() error {
 		return err
 	}
 
-	frame.draw()
 	return nil
 }
 
@@ -642,6 +641,14 @@ func (frame *Frame) close() error {
 			return err
 		}
 	}
+
+	// move the cursor past the end of the frame
+	scr := getScreen()
+	event := ScreenEvent{
+		row:   frame.startIdx + frame.Height(),
+		value: []byte{},
+	}
+	scr.events <- event
 
 	frame.closed = true
 	return nil
@@ -770,10 +777,6 @@ func (frame *Frame) draw() (errs []error) {
 				errs = append(errs, err)
 			}
 		}
-	}
-
-	if frame.IsClosed() {
-		setCursorRow(frame.startIdx + frame.Height())
 	}
 
 	return errs
