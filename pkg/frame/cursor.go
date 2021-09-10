@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package frame
@@ -10,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // todo: will this be supported on windows?... https://github.com/nsf/termbox-go/blob/master/termbox_windows.go
@@ -37,11 +38,11 @@ func GetCursorRow() (int, error) {
 	var row int
 	scr := getScreen()
 	fd := int(scr.output.Fd())
-	oldState, err := terminal.MakeRaw(fd)
+	oldState, err := term.MakeRaw(fd)
 	if err != nil {
 		return -1, err
 	}
-	defer terminal.Restore(fd, oldState)
+	defer term.Restore(fd, oldState)
 
 	// capture keyboard output from echo
 	reader := bufio.NewReader(os.Stdin)

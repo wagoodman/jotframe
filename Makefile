@@ -1,7 +1,7 @@
 all: clean
 
 run:
-	go run examples/download/main.go
+	go run examples/overflow-frame/main.go
 
 lint:
 	golangci-lint run --tests=false

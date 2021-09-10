@@ -37,7 +37,7 @@ func main() {
 		TrailOnRemove:  false,
 		PositionPolicy: frame.PolicyFloatTop,
 		ManualDraw:     false,
-		Output: os.Stderr,
+		Output:         os.Stderr,
 	}
 	fr, err := frame.New(config)
 	if err != nil {
