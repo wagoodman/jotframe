@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package frame
@@ -7,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 var (
@@ -26,7 +27,7 @@ func GetTerminalSize() (int, int) {
 }
 
 func getTerminalSize() (int, int) {
-	termWidth, termHeight, _ := terminal.GetSize(int(getScreen().output.Fd()))
+	termWidth, termHeight, _ := term.GetSize(int(getScreen().output.Fd()))
 	return termWidth, termHeight
 }
 
