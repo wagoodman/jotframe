@@ -3,7 +3,7 @@ package frame
 import (
 	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/crypto/ssh/term"
 )
 
 func GetTerminalSize() (int, int) {
@@ -11,7 +11,7 @@ func GetTerminalSize() (int, int) {
 }
 
 func getTerminalSize() (int, int) {
-	termWidth, termHeight, _ := terminal.GetSize(int(getScreen().output.Fd()))
+	termWidth, termHeight, _ := term.GetSize(int(getScreen().output.Fd()))
 	return termWidth, termHeight
 }
 
