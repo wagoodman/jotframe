@@ -3,7 +3,7 @@ package frame
 import (
 	"time"
 
-	"golang.org/x/crypto/ssh/term"
+	"golang.org/x/term"
 )
 
 func GetTerminalSize() (int, int) {
