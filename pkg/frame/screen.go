@@ -45,7 +45,7 @@ func (scr *screen) reset() {
 	scr.lock.Lock()
 	defer scr.lock.Unlock()
 
-	theScr.events = make(chan ScreenEvent, 10000000)
+	theScr.events = make(chan ScreenEvent, 100000)
 	theScr.frames = make([]*Frame, 0)
 	theScr.handlers = make([]EventHandler, 0)
 	theScr.workers = &sync.WaitGroup{}
